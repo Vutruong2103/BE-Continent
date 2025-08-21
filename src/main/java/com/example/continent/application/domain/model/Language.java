@@ -23,12 +23,11 @@
         @ManyToMany(mappedBy = "languages")
         private List<Country> countries;
 
-        @Column(name = "deleted", nullable = false)
-        private boolean deleted ;
+//        @Column(name = "deleted", nullable = false)
+//        private boolean deleted ;
 
         @PrePersist @PreUpdate
         void upcase() { if (code != null) code = code.toUpperCase();
-
 
         }
     }

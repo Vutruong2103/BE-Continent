@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ContinentDto {
-    private Long continentDtoId;
+    private Long Id;
     private String code;
     private String name;
 }
