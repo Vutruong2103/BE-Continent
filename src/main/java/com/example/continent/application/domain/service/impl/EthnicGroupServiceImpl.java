@@ -4,6 +4,7 @@ import com.example.continent.application.domain.model.EthnicGroup;
 import com.example.continent.application.domain.repository.EthnicGroupRepository;
 import com.example.continent.application.domain.service.EthnicGroupService;
 import com.example.continent.application.dto.EthnicGroupDto;
+import com.example.continent.application.exception.ResourceNotFoundException;
 import com.example.continent.application.mapper.EthnicGroupMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
     @Override
     public EthnicGroupDto update(Long id, EthnicGroupDto dto) {
         EthnicGroup group = ethnicGroupRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("EthnicGroup not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("EthnicGroup with id " + id + " not found"));
         group.setCode(dto.getCode());
         group.setName(dto.getName());
         return ethnicGroupMapper.toDto(ethnicGroupRepository.save(group));
@@ -35,14 +36,16 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
 
     @Override
     public void delete(Long id) {
-        ethnicGroupRepository.deleteById(id);
+        EthnicGroup group = ethnicGroupRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("EthnicGroup with id " + id + " not found"));
+        ethnicGroupRepository.delete(group);
     }
 
     @Override
     public EthnicGroupDto getById(Long id) {
         return ethnicGroupRepository.findById(id)
                 .map(ethnicGroupMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("EthnicGroup not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("EthnicGroup with id " + id + " not found"));
     }
 
     @Override

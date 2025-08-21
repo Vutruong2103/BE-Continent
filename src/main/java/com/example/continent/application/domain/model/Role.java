@@ -2,6 +2,8 @@ package com.example.continent.application.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.List;
 
@@ -12,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role {
+public class Role extends AbstractAuditingEntity<Long>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

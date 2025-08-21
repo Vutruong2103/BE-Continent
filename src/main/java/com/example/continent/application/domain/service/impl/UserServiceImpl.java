@@ -6,12 +6,15 @@ import com.example.continent.application.domain.repository.RoleRepository;
 import com.example.continent.application.domain.repository.UserRepository;
 import com.example.continent.application.domain.service.UserService;
 import com.example.continent.application.dto.UserDto;
+import com.example.continent.application.exception.DuplicateResourceException;
+import com.example.continent.application.exception.ResourceNotFoundException;
 import com.example.continent.application.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,7 +26,14 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
 
     @Override
+    @Transactional
     public UserDto create(UserDto dto) {
+        // Kiểm tra trùng username
+        Optional<User> existing = userRepository.findByUsername(dto.getUsername());
+        if (existing.isPresent()) {
+            throw new DuplicateResourceException("User with username '" + dto.getUsername() + "' already exists");
+        }
+
         User user = userMapper.toEntity(dto);
         if (dto.getRoleId() != null && !dto.getRoleId().isEmpty()) {
             List<Role> roles = roleRepository.findAllById(dto.getRoleId());
@@ -33,12 +43,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto update(Long id, UserDto dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+
+        // Kiểm tra trùng username (trừ chính nó)
+        userRepository.findByUsername(dto.getUsername())
+                .filter(u -> !u.getId().equals(id))
+                .ifPresent(u -> {
+                    throw new DuplicateResourceException("User with username '" + dto.getUsername() + "' already exists");
+                });
+
         user.setUsername(dto.getUsername());
         user.setPassword(dto.getPassword());
-        if (dto.getRoleId() != null) {
+
+        if (dto.getRoleId() != null && !dto.getRoleId().isEmpty()) {
             List<Role> roles = roleRepository.findAllById(dto.getRoleId());
             user.setRoles(roles);
         }
@@ -46,25 +66,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
         userRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getById(Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
 
     @Override
-    // Transactional giữ session mở cho đến khi mapping xong, giúp Hibernate kịp lazy load các collection như roles
-    @Transactional(readOnly = true)//readOnly = true chỉ đọc dữ liệu, không update dữ liệu
+    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
-//        return userRepository.findAll()
-//                .stream()
-//                .map(userMapper::toDto)
-//                .collect(Collectors.toList());
         List<User> users = userRepository.findAll();
         users.forEach(u -> System.out.println("User: " + u.getUsername() + " - roles: " + u.getRoles()));
         return users.stream()
@@ -72,4 +92,3 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 }
-

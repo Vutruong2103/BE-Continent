@@ -2,14 +2,16 @@ package com.example.continent.application.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.List;
-
 @Entity
 @Table(name = "continent",
         uniqueConstraints = { @UniqueConstraint(columnNames = "code") })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Continent {
+
+public class Continent extends AbstractAuditingEntity<Long>{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -7,6 +7,7 @@ import com.example.continent.application.domain.repository.CountryRepository;
 import com.example.continent.application.domain.service.CountryService;
 import com.example.continent.application.dto.CountryDto;
 import com.example.continent.application.dto.LanguageDto;
+import com.example.continent.application.exception.ResourceNotFoundException;
 import com.example.continent.application.mapper.CountryMapper;
 
 import com.example.continent.application.mapper.LanguageMapper;
@@ -24,14 +25,13 @@ public class CountryServiceImpl implements CountryService {
     private final CountryRepository countryRepository;
     private final ContinentRepository continentRepository;
     private final CountryMapper countryMapper;
-
-    private final LanguageMapper languageMapper;  // bạn đã có LanguageMapper rồi
+    private final LanguageMapper languageMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<LanguageDto> getLanguagesByCountry(Long countryId) {
         Country country = countryRepository.findById(countryId)
-                .orElseThrow(() -> new RuntimeException("Country not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Country with id " + countryId + " not found"));
 
         return country.getLanguages()
                 .stream()
@@ -41,9 +41,10 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public CountryDto create(CountryDto dto) {
-        Country country = countryMapper.toEntity(dto);
         Continent continent = continentRepository.findById(dto.getContinentId())
-                .orElseThrow(() -> new RuntimeException("Continent not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Continent with id " + dto.getContinentId() + " not found"));
+
+        Country country = countryMapper.toEntity(dto);
         country.setContinent(continent);
         return countryMapper.toDto(countryRepository.save(country));
     }
@@ -51,17 +52,23 @@ public class CountryServiceImpl implements CountryService {
     @Override
     public CountryDto update(Long id, CountryDto dto) {
         Country country = countryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Country not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Country with id " + id + " not found"));
+
+        Continent continent = continentRepository.findById(dto.getContinentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Continent with id " + dto.getContinentId() + " not found"));
+
         country.setCode(dto.getCode());
         country.setName(dto.getName());
-        Continent continent = continentRepository.findById(dto.getContinentId())
-                .orElseThrow(() -> new RuntimeException("Continent not found"));
         country.setContinent(continent);
+
         return countryMapper.toDto(countryRepository.save(country));
     }
 
     @Override
     public void delete(Long id) {
+        if (!countryRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Country with id " + id + " not found");
+        }
         countryRepository.deleteById(id);
     }
 
@@ -69,7 +76,7 @@ public class CountryServiceImpl implements CountryService {
     public CountryDto getById(Long id) {
         return countryRepository.findById(id)
                 .map(countryMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Country not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Country with id " + id + " not found"));
     }
 
     @Override
@@ -80,4 +87,3 @@ public class CountryServiceImpl implements CountryService {
                 .collect(Collectors.toList());
     }
 }
-
