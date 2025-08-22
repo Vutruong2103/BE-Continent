@@ -11,13 +11,14 @@ import com.example.continent.application.exception.ResourceNotFoundException;
 import com.example.continent.application.mapper.LanguageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,76 +28,108 @@ public class LanguageServiceImpl implements LanguageService {
     private final LanguageRepository languageRepository;
     private final LanguageMapper languageMapper;
     private final CountryRepository countryRepository;
+    private final MessageSource messageSource;
 
     @Override
     @Transactional
     public LanguageDto create(LanguageDto dto) {
         log.debug(">>> LanguageDto input: {}", dto);
 
-        Language language = languageMapper.toEntity(dto);
-
         // Kiểm tra trùng code
-        Optional<Language> found = languageRepository.findByCodeAndDeletedFalse(language.getCode());
-        if (found.isPresent()) {
-            log.debug(">>> Ngôn ngữ đã tồn tại: {}", found.get());
-            throw new DuplicateResourceException("Language with code " + language.getCode() + " already exists");
-        }
+        languageRepository.findByCodeAndDeletedFalse(dto.getCode())
+                .ifPresent(lang -> {
+                    throw new DuplicateResourceException(
+                            messageSource.getMessage("error.language.exists",
+                                    new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
+                    );
+                });
 
-        List<Country> countries = new ArrayList<>();
-        List<Language> languages = new ArrayList<>();
-        languages.add(language);
+        Language language = languageMapper.toEntity(dto);
+        language.setDeleted(false);
 
-        // Lưu language
-        languageRepository.save(language);
-
-        // Nếu có countryId thì set mối quan hệ
+        // Nếu có countryId thì set quan hệ
         if (dto.getCountryId() != null && !dto.getCountryId().isEmpty()) {
-            countries = countryRepository.findAllById(dto.getCountryId());
+            List<Country> countries = countryRepository.findAllById(dto.getCountryId());
 
             if (countries.isEmpty()) {
-                throw new ResourceNotFoundException("Countries not found for provided IDs");
+                throw new ResourceNotFoundException(
+                        messageSource.getMessage("error.country.notfound.ids",
+                                new Object[]{dto.getCountryId()}, LocaleContextHolder.getLocale())
+                );
             }
 
             log.debug(">>> Countries tìm thấy: {}", countries.size());
             language.setCountries(countries);
-            countries.forEach(country -> country.setLanguages(languages));
-            countryRepository.saveAll(countries);
+            countries.forEach(c -> c.getLanguages().add(language));
         }
-
-        return languageMapper.toDto(language);
-    }
-
-    @Override
-    public LanguageDto update(Long id, LanguageDto dto) {
-        Language language = languageRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Language with id " + id + " not found"));
-
-        language.setCode(dto.getCode());
-        language.setName(dto.getName());
 
         return languageMapper.toDto(languageRepository.save(language));
     }
 
     @Override
+    @Transactional
+    public LanguageDto update(Long id, LanguageDto dto) {
+        Language language = languageRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messageSource.getMessage("error.language.notfound",
+                                new Object[]{id}, LocaleContextHolder.getLocale())
+                ));
+
+        // Kiểm tra duplicate code (trừ chính nó)
+        languageRepository.findByCodeAndDeletedFalse(dto.getCode())
+                .filter(l -> !l.getId().equals(id))
+                .ifPresent(l -> {
+                    throw new DuplicateResourceException(
+                            messageSource.getMessage("error.language.exists",
+                                    new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
+                    );
+                });
+
+        language.setCode(dto.getCode());
+        language.setName(dto.getName());
+
+        // cập nhật lại quan hệ với country nếu có
+        if (dto.getCountryId() != null && !dto.getCountryId().isEmpty()) {
+            List<Country> countries = countryRepository.findAllById(dto.getCountryId());
+            if (countries.isEmpty()) {
+                throw new ResourceNotFoundException(
+                        messageSource.getMessage("error.country.notfound.ids",
+                                new Object[]{dto.getCountryId()}, LocaleContextHolder.getLocale())
+                );
+            }
+            language.setCountries(countries);
+        }
+
+        return languageMapper.toDto(languageRepository.save(language));
+    }
+
+    @Override
+    @Transactional
     public void delete(Long id) {
-        Language language = languageRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Language with id " + id + " not found"));
-
-        languageRepository.delete(language);
+        Language language = languageRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messageSource.getMessage("error.language.notfound",
+                                new Object[]{id}, LocaleContextHolder.getLocale())
+                ));
+        language.setDeleted(true); // xóa mềm
+        languageRepository.save(language);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LanguageDto getById(Long id) {
-        return languageRepository.findById(id)
+        return languageRepository.findByIdAndDeletedFalse(id)
                 .map(languageMapper::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Language with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messageSource.getMessage("error.language.notfound",
+                                new Object[]{id}, LocaleContextHolder.getLocale())
+                ));
     }
 
     @Override
-    public List<LanguageDto> getAll() {
-        return languageRepository.findAll()
-                .stream()
-                .map(languageMapper::toDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<LanguageDto> getAll(Pageable pageable) {
+        return languageRepository.findAllByDeletedFalse(pageable)
+                .map(languageMapper::toDto);
     }
 }

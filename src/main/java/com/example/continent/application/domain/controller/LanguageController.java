@@ -4,6 +4,8 @@ import com.example.continent.application.dto.LanguageDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,14 +14,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/languages")
 @RequiredArgsConstructor
-@Slf4j
 public class LanguageController {
 
     private final LanguageService languageService;
 
     @PostMapping
     public ResponseEntity<LanguageDto> create(@RequestBody LanguageDto dto) {
-        log.debug("Creating language with details: {}", dto);
         return ResponseEntity.ok(languageService.create(dto));
     }
 
@@ -30,7 +30,7 @@ public class LanguageController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        languageService.delete(id);
+        languageService.delete(id); // xóa mềm
         return ResponseEntity.noContent().build();
     }
 
@@ -40,8 +40,8 @@ public class LanguageController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LanguageDto>> getAll() {
-        return ResponseEntity.ok(languageService.getAll());
+    public ResponseEntity<Page<LanguageDto>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(languageService.getAll(pageable));
     }
 }
 

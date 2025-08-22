@@ -1,6 +1,9 @@
 package com.example.continent.application.domain.service;
 
 import com.example.continent.application.dto.LanguageDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface LanguageService {
@@ -8,6 +11,6 @@ public interface LanguageService {
     LanguageDto update(Long id, LanguageDto dto);
     void delete(Long id);
     LanguageDto getById(Long id);
-    List<LanguageDto> getAll();
+    Page<LanguageDto> getAll(Pageable pageable);
 }
 

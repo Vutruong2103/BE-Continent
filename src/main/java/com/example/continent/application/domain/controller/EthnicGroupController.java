@@ -3,6 +3,8 @@ package com.example.continent.application.domain.controller;
 import com.example.continent.application.domain.service.EthnicGroupService;
 import com.example.continent.application.dto.EthnicGroupDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,7 @@ public class EthnicGroupController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        ethnicGroupService.delete(id);
+        ethnicGroupService.delete(id); // xóa mềm
         return ResponseEntity.noContent().build();
     }
 
@@ -37,7 +39,7 @@ public class EthnicGroupController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EthnicGroupDto>> getAll() {
-        return ResponseEntity.ok(ethnicGroupService.getAll());
+    public ResponseEntity<Page<EthnicGroupDto>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(ethnicGroupService.getAll(pageable));
     }
 }

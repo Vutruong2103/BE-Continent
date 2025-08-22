@@ -1,7 +1,10 @@
 package com.example.continent.application.exception;
 
-public class DuplicateResourceException extends RuntimeException {
-    public DuplicateResourceException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class DuplicateResourceException extends BaseException {
+    public DuplicateResourceException(String code, Object... args) {
+        super(HttpStatus.BAD_REQUEST, code, args);
     }
 }
+
