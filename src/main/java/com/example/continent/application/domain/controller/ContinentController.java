@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//nơi request/response từ client
+
 @RestController
 @RequestMapping("/api/continents")
 @RequiredArgsConstructor
@@ -17,8 +19,14 @@ public class ContinentController {
 
     private final ContinentService continentService;
 
+    /*
+    * ResponseEntity<ContinentDto> = dữ liệu + status code + headers.
+    * @RequestBody ContinentDto dto: Nhận JSON từ request body và convert nó sang object ContinentDto.
+    * */
     @PostMapping
     public ResponseEntity<ContinentDto> create(@RequestBody ContinentDto dto) {
+        //Gọi xuống service để xử lý lưu dữ liệu (ví dụ insert DB).
+        //Trả về ContinentDto sau khi đã lưu thành công.
         return ResponseEntity.ok(continentService.create(dto));
     }
 

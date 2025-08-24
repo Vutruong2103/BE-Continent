@@ -15,18 +15,30 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/*
+* nơi xử lý logic các method từ servie chuyển cho controller sử dụng
+*/
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ContinentServiceImpl implements ContinentService {
 
+    //để thao tác với database (CRUD cho bảng Continent)
     private final ContinentRepository continentRepository;
+
+    //để chuyển đổi giữa ContinentDto và Continent (Entity)
     private final ContinentMapper continentMapper;
+
     private final MessageSource messageSource;
+
+    /*
+    * map DTO → Entity → save DB → convert lại trả về DTO -> client
+    */
 
     @Override
     public ContinentDto create(ContinentDto dto) {
-        // Check duplicate code
+        // Check trùng code hay kh
         if (continentRepository.existsByCode(dto.getCode())) {
             throw new ResourceAlreadyExistsException(
                     messageSource.getMessage("error.continent.exists",
@@ -34,8 +46,9 @@ public class ContinentServiceImpl implements ContinentService {
                             LocaleContextHolder.getLocale())
             );
         }
-        Continent continent = continentMapper.toEntity(dto);
-        return continentMapper.toDto(continentRepository.save(continent));
+        Continent continent = continentMapper.toEntity(dto);//chuyển dto sang entity để lưu db
+        //continentMapper.toDto(): chuyển entity vừa lưu → ContinentDto để trả về cho client.
+        return continentMapper.toDto(continentRepository.save(continent));//lưu entity vào db
     }
 
     @Override

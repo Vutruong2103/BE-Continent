@@ -5,6 +5,7 @@ import com.example.continent.application.domain.model.Continent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+
 @Mapper(componentModel = "spring")
 public interface ContinentMapper {
     ContinentDto toDto(Continent continent);
