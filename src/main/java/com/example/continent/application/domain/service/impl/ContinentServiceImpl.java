@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /*
 * nơi xử lý logic các method từ servie chuyển cho controller sử dụng
 */
@@ -99,5 +101,18 @@ public class ContinentServiceImpl implements ContinentService {
         // Xóa mềm
         continent.setDeleted(true);
         continentRepository.save(continent);
+    }
+
+    @Override
+    public List<ContinentDto> searchByName(String keyword) {
+        List<Continent> contients;
+        if(keyword==null || keyword.isBlank()){
+            contients = continentRepository.findAll();
+        }else {
+            contients = continentRepository.findByNameContainingIgnoreCase(keyword);
+        }
+        return contients.stream()
+                .map(continentMapper::toDto)
+                .toList();
     }
 }

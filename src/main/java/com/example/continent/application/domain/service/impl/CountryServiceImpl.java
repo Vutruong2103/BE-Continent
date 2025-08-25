@@ -4,8 +4,11 @@ import com.example.continent.application.domain.model.Continent;
 import com.example.continent.application.domain.model.Country;
 import com.example.continent.application.domain.repository.ContinentRepository;
 import com.example.continent.application.domain.repository.CountryRepository;
+import com.example.continent.application.domain.repository.EthnicGroupRepository;
+import com.example.continent.application.domain.repository.LanguageRepository;
 import com.example.continent.application.domain.service.CountryService;
 import com.example.continent.application.dto.CountryDto;
+import com.example.continent.application.dto.EthnicGroupDto;
 import com.example.continent.application.dto.LanguageDto;
 import com.example.continent.application.exception.DuplicateResourceException;
 import com.example.continent.application.exception.ResourceNotFoundException;
@@ -19,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,6 +34,8 @@ public class CountryServiceImpl implements CountryService {
     private final CountryMapper countryMapper;
     private final LanguageMapper languageMapper;
     private final MessageSource messageSource;
+    private final LanguageRepository languageRepository;
+    private final EthnicGroupRepository ethnicGroupRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -134,4 +141,14 @@ public class CountryServiceImpl implements CountryService {
         return countryRepository.findAllByDeletedFalse(pageable)
                 .map(countryMapper::toDto);
     }
+
+    @Override
+    public List<CountryDto> getCountriesByContinent(Long continentId) {
+        List<Country> countries = countryRepository.findByContinentId(continentId);
+        return countries.stream()
+                .map(countryMapper::toDto) // convert entity -> dto
+                .toList();
+    }
+
+
 }

@@ -18,6 +18,6 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
     Optional<Country> findByCodeAndDeletedFalse(String code);
     Optional<Country> findByIdAndDeletedFalse(Long id);
     Page<Country> findAllByDeletedFalse(Pageable pageable);
-
+    List<Country> findByContinentId(Long continentId);
 }
 

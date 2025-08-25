@@ -1,5 +1,6 @@
 package com.example.continent.application.domain.controller;
 import com.example.continent.application.domain.service.LanguageService;
+import com.example.continent.application.dto.EthnicGroupDto;
 import com.example.continent.application.dto.LanguageDto;
 
 import lombok.RequiredArgsConstructor;
@@ -43,5 +44,10 @@ public class LanguageController {
     public ResponseEntity<Page<LanguageDto>> getAll(Pageable pageable) {
         return ResponseEntity.ok(languageService.getAll(pageable));
     }
+
+//    @GetMapping("/{countryId}/language")
+//    public List<LanguageDto> getLanguages(@PathVariable Long countryId) {
+//        return languageService.getLanguagesByCountry(countryId);
+//    }
 }
 

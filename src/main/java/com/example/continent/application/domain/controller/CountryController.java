@@ -1,7 +1,11 @@
 package com.example.continent.application.domain.controller;
 
+import com.example.continent.application.domain.model.Language;
 import com.example.continent.application.domain.service.CountryService;
+import com.example.continent.application.domain.service.EthnicGroupService;
+import com.example.continent.application.domain.service.LanguageService;
 import com.example.continent.application.dto.CountryDto;
+import com.example.continent.application.dto.EthnicGroupDto;
 import com.example.continent.application.dto.LanguageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +21,8 @@ import java.util.List;
 public class CountryController {
 
     private final CountryService countryService;
+    private final LanguageService languageService;
+    private final EthnicGroupService ethnicGroupService;
 
     @PostMapping
     public ResponseEntity<CountryDto> create(@RequestBody CountryDto dto) {
@@ -51,6 +57,25 @@ public class CountryController {
         return ResponseEntity.ok(countryService.getLanguagesByCountry(id, pageable));
     }
 
+    @GetMapping("/by-continent/{continentId}")
+    public ResponseEntity<List<CountryDto>> getCountriesByContinent(@PathVariable Long continentId) {
+        return ResponseEntity.ok(countryService.getCountriesByContinent(continentId));
+    }
+
+//    @GetMapping("/{id}/languages")
+//    public ResponseEntity<List<Language>> getLanguages(@PathVariable Long id) {
+//        return ResponseEntity.ok(countryService.getLanguagesByCountry(id));
+//    }
+
+    @GetMapping("/{countryId}/language")
+    public List<LanguageDto> getLanguages(@PathVariable Long countryId) {
+        return languageService.getLanguagesByCountry(countryId);
+    }
+
+    @GetMapping("/{countryId}/ethnic-group")
+    public List<EthnicGroupDto> getEthnicGroups(@PathVariable Long countryId) {
+        return ethnicGroupService.getEthnicGroupsByCountry(countryId);
+    }
 }
 
 

@@ -132,4 +132,19 @@ public class LanguageServiceImpl implements LanguageService {
         return languageRepository.findAllByDeletedFalse(pageable)
                 .map(languageMapper::toDto);
     }
+
+//    @Override
+//    public List<LanguageDto> getLanguageByCountry(Long countryId) {
+//        return languageRepository.findByCountryId(countryId)
+//                .stream()
+//                .map(languageMapper::toDto)
+//                .toList();
+//    }
+
+    @Override
+    public List<LanguageDto> getLanguagesByCountry(Long countryId) {
+        return languageRepository.findByCountries_Id(countryId).stream()
+                .map(languageMapper::toDto)
+                .toList();
+    }
 }

@@ -1,10 +1,12 @@
 package com.example.continent.application.domain.service.impl;
 
+import com.example.continent.application.domain.model.Continent;
 import com.example.continent.application.domain.model.Role;
 import com.example.continent.application.domain.model.User;
 import com.example.continent.application.domain.repository.RoleRepository;
 import com.example.continent.application.domain.repository.UserRepository;
 import com.example.continent.application.domain.service.UserService;
+import com.example.continent.application.dto.ContinentDto;
 import com.example.continent.application.dto.UserDto;
 import com.example.continent.application.exception.DuplicateResourceException;
 import com.example.continent.application.exception.ResourceNotFoundException;
@@ -121,5 +123,18 @@ public class UserServiceImpl implements UserService {
     public Page<UserDto> getAll(Pageable pageable) {
         return userRepository.findAllByDeletedFalse(pageable)
                 .map(userMapper::toDto);
+    }
+
+    @Override
+    public List<UserDto> searchByName(String keyword) {
+        List<User> user;
+        if(keyword==null || keyword.isBlank()){
+            user = userRepository.findAll();
+        }else {
+            user = userRepository.findByUsernameContainingIgnoreCase(keyword);
+        }
+        return user.stream()
+                .map(userMapper::toDto)
+                .toList();
     }
 }

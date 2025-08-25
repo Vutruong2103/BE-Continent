@@ -23,7 +23,8 @@ public class Country extends AbstractAuditingEntity<Long>{
     @Column(nullable = false, length = 10, unique = true)
     private String code;
 
-    @ManyToOne @JoinColumn(name = "continent_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "continent_id", nullable = false)
     private Continent continent;
 
     @ManyToMany

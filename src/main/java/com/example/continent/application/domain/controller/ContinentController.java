@@ -50,5 +50,10 @@ public class ContinentController {
     public ResponseEntity<Page<ContinentDto>> getAll(Pageable pageable) {
         return ResponseEntity.ok(continentService.getAll(pageable)); // chỉ lấy deleted = false
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ContinentDto>> searchByName(@RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(continentService.searchByName(keyword));
+    }
 }
 

@@ -1,5 +1,6 @@
 package com.example.continent.application.domain.service;
 
+import com.example.continent.application.dto.ContinentDto;
 import com.example.continent.application.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,4 +14,5 @@ public interface UserService {
     UserDto getById(Long id);
 //    List<UserDto> getAll();
     Page<UserDto> getAll(Pageable pageable);
+    List<UserDto> searchByName(String keyword);
 }
