@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-insert-roles
+      author: admin
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column: { name: name, value: "ADMIN" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+        - insert:
+            tableName: role
+            columns:
+              - column: { name: name, value: "MANAGER" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+        - insert:
+            tableName: role
+            columns:
+              - column: { name: name, value: "VIEW" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+
+  - changeSet:
+      id: 002-insert-users
+      author: admin
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username, value: "admin" }
+              # Mật khẩu BCrypt hash của "admin123"
+              - column: { name: password, value: "$2a$10$2b2f8HjPVNNs4uDxS9YvauT8bFyl6kMPfZzR2vG1MaFbS/6apMKxK" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+
+  - changeSet:
+      id: 003-assign-role-admin
+      author: admin
+      changes:
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 1

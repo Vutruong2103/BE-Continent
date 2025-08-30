@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,12 +30,14 @@ public class UserController {
     }
 
     @Operation(summary = "Cập nhật User", description = "API cập nhật thông tin của một User theo ID")
+    @PreAuthorize("hasAnyRole('VIEW','MANAGER')")
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> update(@PathVariable Long id, @RequestBody UserDto dto) {
         return ResponseEntity.ok(userService.update(id, dto));
     }
 
     @Operation(summary = "Xóa mềm User", description = "API xóa mềm User (chỉ đánh dấu deleted = true)")
+    @PreAuthorize("hasRole('MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.delete(id);
@@ -42,17 +45,20 @@ public class UserController {
     }
 
     @Operation(summary = "Lấy User theo ID", description = "API trả về thông tin chi tiết một User")
+    @PreAuthorize("hasAnyRole('VIEW','MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getById(id));
     }
 
     @Operation(summary = "Danh sách User (có phân trang)", description = "API trả về danh sách tất cả User chưa bị xóa")
+    @PreAuthorize("hasAnyRole('VIEW','MANAGER')")
     @GetMapping
     public ResponseEntity<Page<UserDto>> getAll(Pageable pageable) {
         return ResponseEntity.ok(userService.getAll(pageable));
     }
 
+    @PreAuthorize("hasAnyRole('VIEW','MANAGER')")
     @GetMapping("/search")
     @Transactional(readOnly = true)
     public ResponseEntity<List<UserDto>> searchByName(@RequestParam(required = false) String keyword) {

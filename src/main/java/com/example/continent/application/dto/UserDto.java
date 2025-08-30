@@ -12,8 +12,8 @@ public class UserDto {
      Long id;
      String username;
      String password; //ẩn trong response
-    Set<String> roleName; // Chỉ lấy tên của các role, không lấy id
-    List<Long> roleId;
+     Set<String> roleName; // Chỉ lấy tên của các role, không lấy id
+     List<Long> roleId;
 //    private List<RoleDto> roles;
 }
     
