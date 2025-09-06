@@ -1,0 +1,110 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-insert-role-admin
+      author: admin
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM role WHERE name = 'ADMIN'
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column: { name: name, value: "ROLE_ADMIN" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+
+  - changeSet:
+      id: 002-insert-role-manager
+      author: admin
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM role WHERE name = 'MANAGER'
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column: { name: name, value: "ROLE_MANAGER" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+
+  - changeSet:
+      id: 003-insert-role-view
+      author: admin
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM role WHERE name = 'VIEW'
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column: { name: name, value: "ROLE_VIEW" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+
+  - changeSet:
+      id: 004-insert-user-admin
+      author: admin
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM users WHERE username = 'admin'
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username, value: "admin" }
+              # BCrypt hash của "admin123"
+              - column: { name: password, value: "$2a$12$NIMsbR0yz4u.U7MxnjH/kuPlXPPO7.LWCdWTBZrwy2ZXh11OOQs5m" }
+              - column: { name: created_by, value: "system" }
+              - column: { name: deleted, valueBoolean: false }
+
+  - changeSet:
+      id: 005-assign-role-admin
+      author: admin
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM user_role ur
+            JOIN users u ON ur.user_id = u.id
+            JOIN role r ON ur.role_id = r.id
+            WHERE u.username = 'admin' AND r.name = 'ADMIN'
+      changes:
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 1
+
+  - changeSet:
+      id: 006-assign-role-manager
+      author: admin
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM user_role ur
+            JOIN users u ON ur.user_id = u.id
+            JOIN role r ON ur.role_id = r.id
+            WHERE u.username = 'admin' AND r.name = 'MANAGER'
+      changes:
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 2

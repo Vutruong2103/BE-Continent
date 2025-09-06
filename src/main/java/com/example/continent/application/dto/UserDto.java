@@ -1,19 +1,26 @@
 package com.example.continent.application.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 import java.util.Set;
 
 @Data
-@FieldDefaults(makeFinal = true)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
-     Long id;
-     String username;
-     String password; //ẩn trong response
-     Set<String> roleName; // Chỉ lấy tên của các role, không lấy id
-     List<Long> roleId;
+    private  Long id;
+    private  String username;
+    private String password; //ẩn trong response
+    private List<String> roleName;
+    private List<Long> roleIds;
 //    private List<RoleDto> roles;
 }
+
+
     

@@ -1,9 +1,15 @@
 package com.example.continent.application.rest;
 
+import com.example.continent.application.domain.response.JWTAuthResponse;
+import com.example.continent.application.domain.service.AuthService;
+import com.example.continent.application.request.LoginDto;
 import com.example.continent.application.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -15,31 +21,27 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+    AuthenticationManager authenticationManager;
+    AuthService authService;
+    JwtService jwtService;
 
     @PostMapping("/login")
     @Operation(summary = "Đăng nhập nhận JWT")
-    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest req) {
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
-        );
-        UserDetails principal = (UserDetails) auth.getPrincipal();
+    public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto) {
+        String email = loginDto.getUsername();
+        String password = loginDto.getPassword();
+        authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
-        String token = jwtService.generateToken(principal.getUsername(), new HashMap<>());
-        return ResponseEntity.ok(new TokenResponse(token));
+        String token = jwtService.generateToken(email);
+//        String token = authService.login(loginDto);
+        JWTAuthResponse jwt = JWTAuthResponse.builder().token(token).build();
+        log.info("token: {}", token);
+        return ResponseEntity.ok(jwt);
     }
 
-    @Data
-    public static class LoginRequest {
-        private String username;
-        private String password;
-    }
-
-    @Data
-    public static class TokenResponse {
-        private final String token;
-    }
 }
