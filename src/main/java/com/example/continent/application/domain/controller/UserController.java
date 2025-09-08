@@ -5,6 +5,7 @@ import com.example.continent.application.dto.ContinentDto;
 import com.example.continent.application.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +26,7 @@ public class UserController {
 
     @Operation(summary = "Tạo mới User", description = "API dùng để tạo mới User với username, password và danh sách role")
     @PostMapping
-    public ResponseEntity<UserDto> create(@RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> create(@RequestBody @Valid UserDto dto) {
         return ResponseEntity.ok(userService.create(dto));
     }
 

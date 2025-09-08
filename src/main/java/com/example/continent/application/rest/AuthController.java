@@ -32,15 +32,20 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "Đăng nhập nhận JWT")
     public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto) {
-        String email = loginDto.getUsername();
-        String password = loginDto.getPassword();
-        authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        // Xác thực user (Spring Security sẽ gọi CustomUserDetailsService + check password)
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDto.getUsername(),
+                        loginDto.getPassword()
+                )
+        );
 
-        String token = jwtService.generateToken(email);
-//        String token = authService.login(loginDto);
+        // Sinh token từ Authentication => chứa username + scopes/roles
+        String token = jwtService.generateToken(authentication);
+
         JWTAuthResponse jwt = JWTAuthResponse.builder().token(token).build();
         log.info("token: {}", token);
+
         return ResponseEntity.ok(jwt);
     }
 

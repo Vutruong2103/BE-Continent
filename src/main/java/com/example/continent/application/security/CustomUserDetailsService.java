@@ -11,6 +11,12 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * implements UserDetailsService Khi login, Spring Security sẽ gọi loadUserByUsername(username) để lấy thông tin user từ DB.
+ * Chính vì vậy cần tự viết CustomUserDetailsService để Spring biết cách tìm user của mình
+ * loadUserByUsername tìm username trong db, trả về UserDetails đã được UserDetailsCustom
+ */
+
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -36,8 +42,4 @@ public class CustomUserDetailsService implements UserDetailsService {
 //                        .collect(Collectors.toSet())
 //        );
 //    }
-
-
-
-
 }

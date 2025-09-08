@@ -1,25 +1,32 @@
 package com.example.continent.application.security;
 
+import com.example.continent.application.domain.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+
+/**
+ *
+ */
 
 @Service
 @Slf4j
 public class JwtService {
 
+    //khóa bí mật dùng để ký token
     @Value("${security.jwt.secret:change-me-to-256bit-secret-change-me}")
     private String secret;
 
@@ -40,18 +47,30 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String username, Map<String, Object> extraClaims,boolean old) {
-        Date now = new Date();
-        Date exp = new Date(now.getTime() + expirationMs);
+    public String generateToken(Authentication authentication) {
+        String username = authentication.getName();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        Date currentDate = new Date();
+        Date expireDate = new Date(currentDate.getTime() + expirationMs);
+
+        // Lấy authorities (roles hoặc scopes)
+        List<String> scopes = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)   // ví dụ "ROLE_MANAGER"
+                .toList();
+
+        // Nhúng scopes vào claim
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("scopes", scopes);
+
         return Jwts.builder()
-                .setClaims(extraClaims)
+                .setClaims(claims)
                 .setSubject(username)
-                .setIssuedAt(now)
-                .setExpiration(exp)
+                .setIssuedAt(currentDate)
+                .setExpiration(expireDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder().setClaims(claims).setSubject(subject)
@@ -59,27 +78,38 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
+//    public String generateToken(String username, Map<String, Object> extraClaims,boolean old) {
+//        Date now = new Date();
+//        Date exp = new Date(now.getTime() + expirationMs);
+//        return Jwts.builder()
+//                .setClaims(extraClaims)
+//                .setSubject(username)
+//                .setIssuedAt(now)
+//                .setExpiration(exp)
+//                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+//                .compact();
+//    }
 
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
-    }
+//    public String generateToken(String username) {
+//        Map<String, Object> claims = new HashMap<>();
+//        return createToken(claims, username);
+//    }
 
-    public String generateToken(Authentication authentication){
-        String username = authentication.getName();
-
-        Date currentDate = new Date();
-
-        Date expireDate = new Date(currentDate.getTime() + expirationMs);
-
-        String token = Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(expireDate)
-                .signWith(getSigningKey())
-                .compact();
-        return token;
-    }
+//    public String generateToken(Authentication authentication){
+//        String username = authentication.getName();
+//
+//        Date currentDate = new Date();
+//
+//        Date expireDate = new Date(currentDate.getTime() + expirationMs);
+//
+//        String token = Jwts.builder()
+//                .setSubject(username)
+//                .setIssuedAt(new Date())
+//                .setExpiration(expireDate)
+//                .signWith(getSigningKey())
+//                .compact();
+//        return token;
+//    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -135,6 +165,13 @@ public class JwtService {
             log.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
+    }
+
+    private String buildScope(User user){
+        StringJoiner stringJoiner = new StringJoiner("");
+        if(!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(role -> stringJoiner.add(role.getName()));//stringJoiner::add
+        return stringJoiner.toString();
     }
 }
 

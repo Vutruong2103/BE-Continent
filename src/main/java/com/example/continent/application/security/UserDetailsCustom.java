@@ -10,6 +10,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+/**
+ * implements UserDetails: đây là interface chuẩn mà Spring Security sử dụng để quản lý user.
+ * User user: là entity trong database của mình
+ * Constructor nhận vào một User → để ánh xạ sang dạng UserDetails
+ */
+
 public class UserDetailsCustom implements UserDetails {
     private final User user;
 
@@ -17,6 +23,7 @@ public class UserDetailsCustom implements UserDetails {
         this.user = user;
     }
 
+    //Trả về danh sách quyền (role) của user
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName()))

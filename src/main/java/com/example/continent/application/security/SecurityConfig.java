@@ -29,58 +29,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-//
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable);
-//        http
-//                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // Thêm này
-//                .authorizeHttpRequests(auth -> auth
-//                // Swagger & OpenAPI
-//                .requestMatchers(
-//                        "/v3/api-docs/**",
-//                        "/swagger-ui/**",
-//                        "/swagger-ui.html"
-//                ).permitAll()
-//                // Auth endpoints
-//                .requestMatchers(HttpMethod.GET,"/test/**").permitAll()
-//                .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
-//                // READ: VIEW or MANAGER (ở mức controller bạn có thể dùng @PreAuthorize)
-//                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEW","MANAGER")
-//
-//                // WRITE: chỉ MANAGER
-//                .requestMatchers(HttpMethod.POST, "/api/**").hasRole("MANAGER")
-//                .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("MANAGER")
-//                .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("MANAGER")
-//
-//                // Chuẩn bị default, tất cả các request khác CẦN LOGIN
-//                .anyRequest().authenticated()
-//
-//
-//        )
-//         .formLogin(Customizer.withDefaults()) // login mặc định
-//         .httpBasic(Customizer.withDefaults())
-//                .sessionManagement(session ->
-//                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Thêm này
-//        ; // nếu muốn dùng cả basic auth
-//
-//        http.authenticationProvider(daoAuthProvider());
-//        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
 
-
-
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-//        return config.getAuthenticationManager();
-//    }
-
+    //BCryptPasswordEncoder để hash password khi lưu trong DB & so sánh khi login
     @Bean
     public static PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -89,15 +39,32 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/test/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests(auth -> auth
+                        // Swagger & OpenAPI
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html").permitAll()
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+//                        .requestMatchers("/api/**").permitAll()
+                //READ: VIEW or MANAGER (ở mức controller bạn có thể dùng @PreAuthorize)
+                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEW","MANAGER")
 
-        ;
+                // WRITE: chỉ MANAGER
+                .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("MANAGER","ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("MANAGER")
+                        // các request khác phải có token
+                        .anyRequest().authenticated()
+                )
+                //Thêm JwtAuthenticationFilter để chặn mọi request và kiểm tra token.
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
+    //lấy user từ DB (CustomUserDetailsService) và so sánh password với BCrypt.
     @Bean
     public AuthenticationProvider daoAuthProvider() {
         DaoAuthenticationProvider p = new DaoAuthenticationProvider();
@@ -106,6 +73,7 @@ public class SecurityConfig {
         return p;
     }
 
+    //công cụ xác thực user khi login.
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();

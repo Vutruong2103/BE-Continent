@@ -16,42 +16,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-//@Component
-//@RequiredArgsConstructor
-//public class JwtAuthenticationFilter extends OncePerRequestFilter {
-//
-//    private final JwtUtil jwtUtil;
-//    private final DbUserDetailsService userDetailsService;
-//
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request,
-//                                    HttpServletResponse response,
-//                                    FilterChain chain)
-//            throws ServletException, IOException {
-//
-//        //lấy token từ header
-//        String header = request.getHeader("Authorization");
-//        String token = null, username = null;
-//
-//        if (header != null && header.startsWith("Bearer ")) {
-//            token = header.substring(7);
-//            if (jwtUtil.validate(token)) {
-//                username = jwtUtil.extractUsername(token);
-//            }
-//        }
-//
-//        //xác thực user và set vào context
-//        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-//            UserDetails details = userDetailsService.loadUserByUsername(username);
-//            UsernamePasswordAuthenticationToken auth =
-//                    new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
-//            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//            SecurityContextHolder.getContext().setAuthentication(auth);
-//        }
-//        chain.doFilter(request, response);
-//    }
-//}
-//
+/**
+ * JwtAuthenticationFilter làm nhiệm vụ:
+ * 1. Chặn mọi request vào server.
+ * 2. Kiểm tra header Authorization có chứa JWT không.
+ * 3. Nếu có:
+ * Parse token → lấy username.
+ * Validate token.
+ * Lấy thông tin user từ DB.
+ * Set thông tin user + roles vào SecurityContextHolder.
+ * 4. Sau đó cho request đi tiếp.
+ *
+ * extends OncePerRequestFilter Đây là filter của Spring, đảm bảo mỗi request chỉ chạy filter 1 lần
+ */
 
 @Component
 @RequiredArgsConstructor
@@ -65,15 +42,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        // Lấy header "Authorization" từ request.
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
 
+        //Nếu header có dạng "Bearer <token>" → cắt ra lấy JWT.
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtUtil.extractUsername(token);
         }
 
+        //Kiểm tra & xác thực token
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtUtil.validateToken(token, userDetails.getUsername())) {
@@ -84,6 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+        //filter chuyển request đi tiếp đến filter tiếp theo hoặc Controller.
         filterChain.doFilter(request, response);
     }
 }
