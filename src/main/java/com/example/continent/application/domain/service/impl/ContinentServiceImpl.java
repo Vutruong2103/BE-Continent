@@ -17,30 +17,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/*
-* nơi xử lý logic các method từ servie chuyển cho controller sử dụng
-*/
+/**
+ * map DTO → Entity → save DB → convert lại trả về DTO -> client
+ * nơi xử lý logic các method từ servie chuyển cho controller sử dụng
+ * quản lý logic liên quan đến Continent như Crud, tìm kiếm, chuyển đổi giữa DTO và Entity, xử lý ngoại lệ và hỗ trợ i18n cho thông báo lỗi.
+ *
+ */
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ContinentServiceImpl implements ContinentService {
 
-    //để thao tác với database (CRUD cho bảng Continent)
     private final ContinentRepository continentRepository;
-
-    //để chuyển đổi giữa ContinentDto và Continent (Entity)
     private final ContinentMapper continentMapper;
-
     private final MessageSource messageSource;
 
-    /*
-    * map DTO → Entity → save DB → convert lại trả về DTO -> client
-    */
 
     @Override
     public ContinentDto create(ContinentDto dto) {
-        // Check trùng code hay kh
         if (continentRepository.existsByCode(dto.getCode())) {
             throw new ResourceAlreadyExistsException(
                     messageSource.getMessage("error.continent.exists",
@@ -48,9 +43,8 @@ public class ContinentServiceImpl implements ContinentService {
                             LocaleContextHolder.getLocale())
             );
         }
-        Continent continent = continentMapper.toEntity(dto);//chuyển dto sang entity để lưu db
-        //continentMapper.toDto(): chuyển entity vừa lưu → ContinentDto để trả về cho client.
-        return continentMapper.toDto(continentRepository.save(continent));//lưu entity vào db
+        Continent continent = continentMapper.toEntity(dto);
+        return continentMapper.toDto(continentRepository.save(continent));
     }
 
     @Override
@@ -81,10 +75,8 @@ public class ContinentServiceImpl implements ContinentService {
                                 new Object[]{id},
                                 LocaleContextHolder.getLocale())
                 ));
-
         continent.setName(dto.getName());
         continent.setCode(dto.getCode());
-
         return continentMapper.toDto(continentRepository.save(continent));
     }
 
@@ -97,8 +89,6 @@ public class ContinentServiceImpl implements ContinentService {
                                         new Object[]{id},
                                         LocaleContextHolder.getLocale())
                         ));
-
-        // Xóa mềm
         continent.setDeleted(true);
         continentRepository.save(continent);
     }

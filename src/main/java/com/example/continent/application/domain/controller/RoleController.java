@@ -1,9 +1,7 @@
 package com.example.continent.application.domain.controller;
 
-import com.example.continent.application.domain.model.Role;
 import com.example.continent.application.domain.service.ContinentService;
 import com.example.continent.application.domain.service.RoleService;
-import com.example.continent.application.dto.LanguageDto;
 import com.example.continent.application.dto.RoleDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,8 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
@@ -22,7 +18,6 @@ import java.util.List;
 public class RoleController {
 
     private final RoleService roleService;
-    private final ContinentService continentService;
 
     @Operation(summary = "Tạo mới Role", description = "API dùng để tạo mới một Role")
     @PostMapping

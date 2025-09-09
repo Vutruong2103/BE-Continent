@@ -2,8 +2,6 @@
 
     import jakarta.persistence.*;
     import lombok.*;
-    import org.hibernate.annotations.SQLDelete;
-    import org.hibernate.annotations.Where;
 
     import java.util.List;
 
@@ -25,9 +23,6 @@
 
         @ManyToMany(mappedBy = "languages")
         private List<Country> countries;
-
-//        @Column(name = "deleted", nullable = false)
-//        private Boolean deleted ;
 
         @PrePersist @PreUpdate
         void upcase() { if (code != null) code = code.toUpperCase();

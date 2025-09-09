@@ -26,7 +26,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleDto create(RoleDto dto) {
-        // Kiểm tra trùng tên role
         roleRepository.findByNameAndDeletedFalse(dto.getName())
                 .ifPresent(r -> {
                     throw new DuplicateResourceException(
@@ -36,7 +35,7 @@ public class RoleServiceImpl implements RoleService {
                 });
 
         Role role = roleMapper.toEntity(dto);
-        role.setDeleted(false); // mặc định chưa bị xóa
+        role.setDeleted(false);
         return roleMapper.toDto(roleRepository.save(role));
     }
 
@@ -48,8 +47,6 @@ public class RoleServiceImpl implements RoleService {
                         messageSource.getMessage("error.role.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
-
-        // Kiểm tra trùng tên role (trừ chính nó)
         roleRepository.findByNameAndDeletedFalse(dto.getName())
                 .filter(r -> !r.getId().equals(id))
                 .ifPresent(r -> {
@@ -58,7 +55,6 @@ public class RoleServiceImpl implements RoleService {
                                     new Object[]{dto.getName()}, LocaleContextHolder.getLocale())
                     );
                 });
-
         role.setName(dto.getName());
         return roleMapper.toDto(roleRepository.save(role));
     }
@@ -71,7 +67,7 @@ public class RoleServiceImpl implements RoleService {
                         messageSource.getMessage("error.role.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
-        role.setDeleted(true); // xóa mềm
+        role.setDeleted(true);
         roleRepository.save(role);
     }
 

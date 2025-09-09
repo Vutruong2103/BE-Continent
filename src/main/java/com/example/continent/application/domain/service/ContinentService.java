@@ -1,14 +1,14 @@
 package com.example.continent.application.domain.service;
 
-import com.example.continent.application.domain.model.Continent;
 import com.example.continent.application.dto.ContinentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-
-//nơi chứa các method cho controller sử dụng
+/**
+ * nơi chứa các method cho controller sử dụng
+ */
 
 public interface ContinentService {
     ContinentDto create(ContinentDto dto);

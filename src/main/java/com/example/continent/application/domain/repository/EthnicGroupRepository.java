@@ -11,23 +11,21 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Lấy đối tượng EthnicGroup (dân tộc).
+ * Từ dân tộc (e) nối sang các quốc gia (countries) mà nó thuộc.
+ * Từ quốc gia (c) nối tiếp sang châu lục (continent).
+ * Lọc theo continentId được truyền vào. và Chỉ lấy những dân tộc chưa bị xoá mềm.
+ * @Query: Lấy dân tộc theo id châu lục
+ */
 public interface EthnicGroupRepository extends JpaRepository<EthnicGroup, Long> {
     Optional<EthnicGroup> findByCodeAndDeletedFalse(String code);
     Optional<EthnicGroup> findByIdAndDeletedFalse(Long id);
     Page<EthnicGroup> findAllByDeletedFalse(Pageable pageable);
 
-
     @EntityGraph(attributePaths = "countries")
     List<EthnicGroup> findByCountries_Id(Long countryId);
 
-
-    /*
-    * Lấy đối tượng EthnicGroup (dân tộc).
-    * Từ dân tộc (e) nối sang các quốc gia (countries) mà nó thuộc.
-    * Từ quốc gia (c) nối tiếp sang châu lục (continent).
-    * Lọc theo continentId được truyền vào. và Chỉ lấy những dân tộc chưa bị xoá mềm.
-    * */
-    // Lấy dân tộc theo id châu lục
     @Query("SELECT e FROM EthnicGroup e " +
             "JOIN e.countries c " +
             "JOIN c.continent ct " +

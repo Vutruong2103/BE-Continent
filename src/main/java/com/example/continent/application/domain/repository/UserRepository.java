@@ -1,6 +1,5 @@
 package com.example.continent.application.domain.repository;
 
-import com.example.continent.application.domain.model.Continent;
 import com.example.continent.application.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

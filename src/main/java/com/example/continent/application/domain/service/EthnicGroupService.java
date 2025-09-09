@@ -12,9 +12,6 @@ public interface EthnicGroupService {
     void delete(Long id);
     EthnicGroupDto getById(Long id);
     Page<EthnicGroupDto> getAll(Pageable pageable);
-//    List<EthnicGroupDto> getEthnicGroupByCountry(Long countryId);
-
     List<EthnicGroupDto> getEthnicGroupsByCountry(Long countryId);
-
     List<EthnicGroupDto> getByContinent(Long continentId);
 }

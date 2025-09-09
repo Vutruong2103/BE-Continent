@@ -49,7 +49,6 @@ public class UserServiceImpl implements UserService {
 
         User user = userMapper.toEntity(dto);
 
-        //mã hóa Password
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         // set roles nếu có
@@ -63,7 +62,7 @@ public class UserServiceImpl implements UserService {
             user.setRoles(roles);
         }
 
-        user.setDeleted(false); // mặc định chưa bị xóa
+        user.setDeleted(false);
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -87,9 +86,8 @@ public class UserServiceImpl implements UserService {
                 });
 
         user.setUsername(dto.getUsername());
-        //mã hóa Password
+
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-//        user.setPassword(dto.getPassword());
 
         // cập nhật roles nếu có
         if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
@@ -101,7 +99,6 @@ public class UserServiceImpl implements UserService {
             }
             user.setRoles(roles);
         }
-
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -113,7 +110,7 @@ public class UserServiceImpl implements UserService {
                         messageSource.getMessage("error.user.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
-        user.setDeleted(true); // xóa mềm
+        user.setDeleted(true);
         userRepository.save(user);
     }
 
@@ -154,7 +151,6 @@ public class UserServiceImpl implements UserService {
         if(u.isPresent()){
             return  u.get();
         }
-//        return u.map(userMapper::toDTO).orElse(null);
         return null;
     }
 }

@@ -1,6 +1,5 @@
 package com.example.continent.application.domain.controller;
 
-import com.example.continent.application.domain.model.Language;
 import com.example.continent.application.domain.service.CountryService;
 import com.example.continent.application.domain.service.EthnicGroupService;
 import com.example.continent.application.domain.service.LanguageService;
@@ -61,11 +60,6 @@ public class CountryController {
     public ResponseEntity<List<CountryDto>> getCountriesByContinent(@PathVariable Long continentId) {
         return ResponseEntity.ok(countryService.getCountriesByContinent(continentId));
     }
-
-//    @GetMapping("/{id}/languages")
-//    public ResponseEntity<List<Language>> getLanguages(@PathVariable Long id) {
-//        return ResponseEntity.ok(countryService.getLanguagesByCountry(id));
-//    }
 
     @GetMapping("/{countryId}/language")
     public List<LanguageDto> getLanguages(@PathVariable Long countryId) {

@@ -1,6 +1,5 @@
 package com.example.continent.application.security;
 
-import com.example.continent.application.domain.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -19,14 +17,22 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
+ * dùng để xử lý JWT trong ứng dụng Spring Boot.
+ * @PostConstruct init(): Khởi tạo key từ chuỗi secret sau khi bean được tạo.
  *
+ * getSigningKey(): Tạo và trả về key dùng để ký và xác thực JWT.
+ * generateToken(Authentication authentication):
+ * Sinh JWT cho user đã xác thực, Lấy username, authorities (quyền) từ user, Đưa quyền vào claim scopes, Thiết lập subject, issuedAt, expiration, ký bằng key bí mật.
+ *
+ * extractUsername(String token): Lấy username (subject) từ JWT.
+ * extractClaim(String token, Function<Claims, T> fn): Hàm tổng quát để lấy bất kỳ claim nào từ JWT.
+ * validateToken(String token, String username): Xác thực JWT bằng cách so sánh username trong token với username được truyền vào
  */
 
 @Service
 @Slf4j
 public class JwtService {
 
-    //khóa bí mật dùng để ký token
     @Value("${security.jwt.secret:change-me-to-256bit-secret-change-me}")
     private String secret;
 
@@ -72,44 +78,6 @@ public class JwtService {
                 .compact();
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder().setClaims(claims).setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(key, SignatureAlgorithm.HS256).compact();
-    }
-//    public String generateToken(String username, Map<String, Object> extraClaims,boolean old) {
-//        Date now = new Date();
-//        Date exp = new Date(now.getTime() + expirationMs);
-//        return Jwts.builder()
-//                .setClaims(extraClaims)
-//                .setSubject(username)
-//                .setIssuedAt(now)
-//                .setExpiration(exp)
-//                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-//                .compact();
-//    }
-
-//    public String generateToken(String username) {
-//        Map<String, Object> claims = new HashMap<>();
-//        return createToken(claims, username);
-//    }
-
-//    public String generateToken(Authentication authentication){
-//        String username = authentication.getName();
-//
-//        Date currentDate = new Date();
-//
-//        Date expireDate = new Date(currentDate.getTime() + expirationMs);
-//
-//        String token = Jwts.builder()
-//                .setSubject(username)
-//                .setIssuedAt(new Date())
-//                .setExpiration(expireDate)
-//                .signWith(getSigningKey())
-//                .compact();
-//        return token;
-//    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -124,54 +92,10 @@ public class JwtService {
         return fn.apply(claims);
     }
 
-
-
-    public boolean isTokenValid(String token, String username) {
-        String sub = extractUsername(token);
-        Date exp = extractClaim(token, Claims::getExpiration);
-        return sub.equals(username) && exp.after(new Date());
-    }
-
-
-    // get username from Jwt token
-    public String getUsername(String token){
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        String username = claims.getSubject();
-        return username;
-    }
-
     public boolean validateToken(String token, String username) {
         String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username));
     }
-    public boolean validateToken(String token){
-        try{
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parse(token);
-            return true;
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            log.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
-        }
-        return false;
-    }
 
-    private String buildScope(User user){
-        StringJoiner stringJoiner = new StringJoiner("");
-        if(!CollectionUtils.isEmpty(user.getRoles()))
-            user.getRoles().forEach(role -> stringJoiner.add(role.getName()));//stringJoiner::add
-        return stringJoiner.toString();
-    }
 }
 

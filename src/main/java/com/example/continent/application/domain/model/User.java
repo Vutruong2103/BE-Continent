@@ -2,11 +2,8 @@ package com.example.continent.application.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "users") // tránh trùng với từ khóa user của SQL

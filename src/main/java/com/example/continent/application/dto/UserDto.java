@@ -7,10 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
@@ -23,12 +21,11 @@ public class UserDto {
     private  String username;
 
     @StrongPassword
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)//không trả pass về khi output
-    private String password; //ẩn trong response
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
 
     private List<String> roleName;
     private List<Long> roleIds;
-//    private List<RoleDto> roles;
 }
 
 

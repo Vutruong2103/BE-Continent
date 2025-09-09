@@ -1,7 +1,6 @@
 package com.example.continent.application.domain.controller;
 
 import com.example.continent.application.domain.service.EthnicGroupService;
-import com.example.continent.application.dto.CountryDto;
 import com.example.continent.application.dto.EthnicGroupDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -49,9 +48,4 @@ public class EthnicGroupController {
         return ResponseEntity.ok(ethnicGroupService.getByContinent(continentId));
     }
 
-
-//    @GetMapping("/{countryId}/ethnic-group")
-//    public List<EthnicGroupDto> getEthnicGroups(@PathVariable Long countryId) {
-//        return ethnicGroupService.getEthnicGroupsByCountry(countryId);
-//    }
 }

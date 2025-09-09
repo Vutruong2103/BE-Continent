@@ -10,7 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//nơi request/response từ client
+/**
+ * nơi request/response từ client
+ * ResponseEntity<ContinentDto> = dữ liệu + status code + headers.
+ * create:
+ * @RequestBody ContinentDto dto: Nhận JSON từ request body và convert nó sang object ContinentDto.
+ * Gọi xuống service để xử lý lưu dữ liệu (ví dụ insert DB).
+ * Trả về ContinentDto sau khi đã lưu thành công.
+ */
 
 @RestController
 @RequestMapping("/api/continents")
@@ -19,14 +26,8 @@ public class ContinentController {
 
     private final ContinentService continentService;
 
-    /*
-    * ResponseEntity<ContinentDto> = dữ liệu + status code + headers.
-    * @RequestBody ContinentDto dto: Nhận JSON từ request body và convert nó sang object ContinentDto.
-    * */
     @PostMapping
     public ResponseEntity<ContinentDto> create(@RequestBody ContinentDto dto) {
-        //Gọi xuống service để xử lý lưu dữ liệu (ví dụ insert DB).
-        //Trả về ContinentDto sau khi đã lưu thành công.
         return ResponseEntity.ok(continentService.create(dto));
     }
 
@@ -37,7 +38,7 @@ public class ContinentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        continentService.delete(id); // xóa mềm
+        continentService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -48,7 +49,7 @@ public class ContinentController {
 
     @GetMapping
     public ResponseEntity<Page<ContinentDto>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(continentService.getAll(pageable)); // chỉ lấy deleted = false
+        return ResponseEntity.ok(continentService.getAll(pageable));
     }
 
     @GetMapping("/search")

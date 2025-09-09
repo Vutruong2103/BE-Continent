@@ -1,16 +1,12 @@
 package com.example.continent.application.domain.controller;
 import com.example.continent.application.domain.service.LanguageService;
-import com.example.continent.application.dto.EthnicGroupDto;
 import com.example.continent.application.dto.LanguageDto;
-
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/languages")
@@ -45,9 +41,5 @@ public class LanguageController {
         return ResponseEntity.ok(languageService.getAll(pageable));
     }
 
-//    @GetMapping("/{countryId}/language")
-//    public List<LanguageDto> getLanguages(@PathVariable Long countryId) {
-//        return languageService.getLanguagesByCountry(countryId);
-//    }
 }
 

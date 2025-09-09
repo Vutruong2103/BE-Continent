@@ -1,7 +1,6 @@
 package com.example.continent.application.mapper;
 
 import com.example.continent.application.domain.model.Country;
-import com.example.continent.application.domain.model.Role;
 import com.example.continent.application.dto.LanguageDto;
 import com.example.continent.application.domain.model.Language;
 import org.mapstruct.Mapper;

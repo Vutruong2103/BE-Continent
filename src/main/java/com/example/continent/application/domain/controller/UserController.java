@@ -1,7 +1,6 @@
 package com.example.continent.application.domain.controller;
 
 import com.example.continent.application.domain.service.UserService;
-import com.example.continent.application.dto.ContinentDto;
 import com.example.continent.application.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

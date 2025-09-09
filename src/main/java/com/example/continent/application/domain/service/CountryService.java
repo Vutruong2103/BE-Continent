@@ -1,7 +1,6 @@
 package com.example.continent.application.domain.service;
 
 import com.example.continent.application.dto.CountryDto;
-import com.example.continent.application.dto.EthnicGroupDto;
 import com.example.continent.application.dto.LanguageDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,11 +13,7 @@ public interface CountryService {
     void delete(Long id);
     CountryDto getById(Long id);
     Page<CountryDto> getAll(Pageable pageable);
-
     Page<LanguageDto> getLanguagesByCountry(Long countryId, Pageable pageable);
     List<CountryDto> getCountriesByContinent(Long continentId);
-
-//    List<LanguageDto> getLanguagesByCountryL(Long countryId);
-//    List<EthnicGroupDto> getEthnicGroupsByCountry(Long countryId);
 }
 

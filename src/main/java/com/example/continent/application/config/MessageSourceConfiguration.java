@@ -13,6 +13,17 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.Locale;
 
+/**
+ * cấu hình i18n (đa ngôn ngữ) cho ứng dụng Spring Boot
+ * messageSource():
+ * đọc file message đa ngôn ngữ từ classpath:i18n/messages, dùng mã hóa UTF-8, tự động reload mỗi 1 giờ.
+ * localeResolver():
+ * xác định ngôn ngữ mặc định cho người dùng (lấy từ Constants.DEFAULT_LANGUAGE), lưu thông tin ngôn ngữ vào session.
+ * localeChangeInterceptor():
+ * lắng nghe tham số lang trên request, cho phép chuyển đổi ngôn ngữ động.
+ * addInterceptors():
+ * Đăng ký interceptor vừa tạo cho tất cả endpoint /api/**, giúp thay đổi ngôn ngữ qua tham số lang trên URL.
+ */
 @Configuration
 public class MessageSourceConfiguration implements WebMvcConfigurer {
 
@@ -37,7 +48,6 @@ public class MessageSourceConfiguration implements WebMvcConfigurer {
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
-        // query param: ?lang=vi hoặc ?lang=en
         lci.setParamName("lang");
         return lci;
     }

@@ -2,13 +2,11 @@ package com.example.continent.application.exception;
 
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -35,23 +33,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<Object> handleBaseException(BaseException ex, Locale locale) {
         var problem = ex.getProblemDetail();
-
-        // dịch message từ messages.properties
         String localizedMessage = messageSource.getMessage(
-                ex.getMessage(),   // code
-                null,              // arguments
-                ex.getMessage(),   // defaultMessage
-                locale             //là ngôn ngữ client gửi lên
+                ex.getMessage(),
+                null,
+                ex.getMessage(),
+                locale
         );
-        //Sau khi dịch message, gán vào field detail của ProblemDetail, client sẽ nhận lỗi dịch ngôn ngữ phù hợp
         problem.setDetail(localizedMessage);
-
         return ResponseEntity.status(problem.getStatus()).body(problem);
     }
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-//    ResponseEntity<String> handlingValidation(MethodArgumentNotValidException exception){
-//        return ResponseEntity.badRequest().body(exception.getFieldError().getDefaultMessage());
-//    }
     public ResponseEntity<Map<String, Object>> handleValidException(MethodArgumentNotValidException ex) {
         Map<String, Object> errors = new HashMap<>();
         errors.put("status", HttpStatus.BAD_REQUEST.value());

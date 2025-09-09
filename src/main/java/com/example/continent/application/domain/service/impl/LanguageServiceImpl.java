@@ -34,8 +34,6 @@ public class LanguageServiceImpl implements LanguageService {
     @Transactional
     public LanguageDto create(LanguageDto dto) {
         log.debug(">>> LanguageDto input: {}", dto);
-
-        // Kiểm tra trùng code
         languageRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .ifPresent(lang -> {
                     throw new DuplicateResourceException(
@@ -43,11 +41,8 @@ public class LanguageServiceImpl implements LanguageService {
                                     new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
                     );
                 });
-
         Language language = languageMapper.toEntity(dto);
         language.setDeleted(false);
-
-        // Nếu có countryId thì set quan hệ
         if (dto.getCountryId() != null && !dto.getCountryId().isEmpty()) {
             List<Country> countries = countryRepository.findAllById(dto.getCountryId());
 
@@ -62,7 +57,6 @@ public class LanguageServiceImpl implements LanguageService {
             language.setCountries(countries);
             countries.forEach(c -> c.getLanguages().add(language));
         }
-
         return languageMapper.toDto(languageRepository.save(language));
     }
 
@@ -84,7 +78,6 @@ public class LanguageServiceImpl implements LanguageService {
                                     new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
                     );
                 });
-
         language.setCode(dto.getCode());
         language.setName(dto.getName());
 
@@ -99,7 +92,6 @@ public class LanguageServiceImpl implements LanguageService {
             }
             language.setCountries(countries);
         }
-
         return languageMapper.toDto(languageRepository.save(language));
     }
 
@@ -111,7 +103,7 @@ public class LanguageServiceImpl implements LanguageService {
                         messageSource.getMessage("error.language.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
-        language.setDeleted(true); // xóa mềm
+        language.setDeleted(true);
         languageRepository.save(language);
     }
 
@@ -132,14 +124,6 @@ public class LanguageServiceImpl implements LanguageService {
         return languageRepository.findAllByDeletedFalse(pageable)
                 .map(languageMapper::toDto);
     }
-
-//    @Override
-//    public List<LanguageDto> getLanguageByCountry(Long countryId) {
-//        return languageRepository.findByCountryId(countryId)
-//                .stream()
-//                .map(languageMapper::toDto)
-//                .toList();
-//    }
 
     @Override
     public List<LanguageDto> getLanguagesByCountry(Long countryId) {
