@@ -17,8 +17,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * daoAuthProvider: lấy user từ DB (CustomUserDetailsService) và so sánh password với BCrypt.
  * authenticationManager: công cụ xác thực user khi login.
+ * @EnableMethodSecurity: để dùng @PreAuthorize trên controller
  */
-//@EnableMethodSecurity // để dùng @PreAuthorize trên controller
+
 @RequiredArgsConstructor
 @Configuration
 @EnableMethodSecurity
@@ -26,6 +27,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public static PasswordEncoder passwordEncoder(){
@@ -43,12 +45,15 @@ public class SecurityConfig {
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEW","MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEW","MANAGER")
 
-                .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("MANAGER","ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("MANAGER")
-                .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("MANAGER","ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("MANAGER")
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
