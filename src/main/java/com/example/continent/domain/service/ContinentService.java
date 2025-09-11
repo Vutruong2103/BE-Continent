@@ -17,5 +17,5 @@ public interface ContinentService {
     void delete(Long id);
     ContinentDto getById(Long id);
     Page<ContinentDto> getAll(Pageable pageable);
-    List<ContinentDto> searchByName(String keyword);
+    List<ContinentDto> searchByName(String keyword); 
 }

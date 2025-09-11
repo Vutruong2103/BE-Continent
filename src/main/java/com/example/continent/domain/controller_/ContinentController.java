@@ -1,4 +1,4 @@
-package com.example.continent.domain.controller;
+package com.example.continent.domain.controller_;
 
 import com.example.continent.application.dto_.ContinentDto;
 import com.example.continent.domain.service.ContinentService;

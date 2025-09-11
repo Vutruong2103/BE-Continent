@@ -100,7 +100,7 @@ public class ContinentServiceImpl implements ContinentService {
         if(keyword==null || keyword.isBlank()){
             contients = continentRepository.findAll();
         }else {
-            contients = continentRepository.findByNameContainingIgnoreCase(keyword);
+            contients = continentRepository.findByNameContainingIgnoreCase(keyword); 
         }
         return contients.stream()
                 .map(continentMapper::toDto)

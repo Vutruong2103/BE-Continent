@@ -22,5 +22,6 @@ public interface ContinentRepository extends JpaRepository<Continent, Long> {
     Boolean existsByCode(String code);
     Optional<Continent> findByIdAndDeletedFalse(Long id);
     Page<Continent> findAllByDeletedFalse(Pageable pageable);
+    
     List<Continent> findByNameContainingIgnoreCase(String keyword); // rồi lỡ từ nớ họ nhập vô dưới DB là đánh dấu xóa rồi răng ?
 }

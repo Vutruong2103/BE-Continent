@@ -36,6 +36,11 @@ public class CountryServiceImpl implements CountryService {
     private final LanguageMapper languageMapper;
     private final MessageSource messageSource;
 
+    /**
+     * @TODO : Check lại gấp :)) 
+     * ChatGPT viết hộ hã em chai :)) Cái gì mà Collectors.collectingAndThen rồi  Collectors.toList ghê ri ông nội. 
+     * Viết code nhớ viết làm răng mình hiểu nữa, lần sau mình nhìn code mình cũng không hiểu làm răng mở rộng hay thay đổi logic
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<LanguageDto> getLanguagesByCountry(Long countryId, Pageable pageable) {

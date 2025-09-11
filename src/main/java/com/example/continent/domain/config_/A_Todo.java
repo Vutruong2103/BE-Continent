@@ -55,19 +55,19 @@ public class A_Todo {
             changeRoleToView(changedDto);
     }
     
-    private boolean currentUserIsSuperAdmin(User currentUser){
-        return  currentUser.getRoles().stream()
-            .anyMatch(role -> ROLE_ADMIN.equals(role.getName()));
-    }
+        private boolean currentUserIsSuperAdmin(User currentUser){
+            return  currentUser.getRoles().stream()
+                .anyMatch(role -> ROLE_ADMIN.equals(role.getName()));
+        }
 
-    private void changeRoleToView(UserDto dto){
-        User change = userMapper.toEntity(dto);
-        change.getRoles().clear();
-        Role role = roleService.getRoleByName(ROLE_VIEW);
-        change.setRoles(new ArrayList<>(java.util.Arrays.asList(role)));
-        userService.save(change);
-        // xóa các mối quan hệ users_roles liên quan ... 
-    }
+        private void changeRoleToView(UserDto dto){
+            User change = userMapper.toEntity(dto);
+            change.getRoles().clear();
+            Role role = roleService.getRoleByName(ROLE_VIEW);
+            change.setRoles(new ArrayList<>(java.util.Arrays.asList(role)));
+            userService.save(change);
+            // xóa các mối quan hệ users_roles liên quan ... 
+        }
 
 }
     public class UserNotAllowException extends BaseException {
