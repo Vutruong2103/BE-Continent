@@ -15,10 +15,10 @@ import java.util.Map;
 /**
  * @RestControllerAdvice bắt exception
  * @ExceptionHandler chỉ ra lớp cần bắt
- *
+ * <p>
  * handleBaseException:
  * Khi service hoặc controller ném throw new BaseException(...) → Spring Boot sẽ gọi method này.
- *
+ * <p>
  * handleValidException: trả về Validation Failed
  */
 @RestControllerAdvice

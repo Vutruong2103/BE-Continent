@@ -13,8 +13,11 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByIdAndDeletedFalse(Long id);
+
     Optional<User> findByUsernameAndDeletedFalse(String username);
+
     Page<User> findAllByDeletedFalse(Pageable pageable);
+
     List<User> findByUsernameContainingIgnoreCase(String keyword);
 
     @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.id = :id")

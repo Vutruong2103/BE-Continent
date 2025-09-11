@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface EthnicGroupMapper {
     @Mapping(target = "countryId", source = "countries", qualifiedByName = "mappingRuleCountryId")
-
     EthnicGroupDto toDto(EthnicGroup ethnicGroup);
 
     @Mapping(target = "countries", ignore = true)

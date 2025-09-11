@@ -14,11 +14,13 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
+
 public class UserDto {
-    private  Long id;
+    private Long id;
 
     @Size(min = 3, message = "Username must be at least 3 characters")
-    private  String username;
+    private String username;
 
     @StrongPassword
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

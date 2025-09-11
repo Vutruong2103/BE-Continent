@@ -6,8 +6,10 @@ import com.example.continent.application.domain.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.mapstruct.AfterMapping;
 import org.mapstruct.MappingTarget;
 

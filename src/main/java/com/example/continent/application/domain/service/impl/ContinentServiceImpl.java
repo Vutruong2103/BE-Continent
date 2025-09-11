@@ -96,9 +96,9 @@ public class ContinentServiceImpl implements ContinentService {
     @Override
     public List<ContinentDto> searchByName(String keyword) {
         List<Continent> contients;
-        if(keyword==null || keyword.isBlank()){
+        if (keyword == null || keyword.isBlank()) {
             contients = continentRepository.findAll();
-        }else {
+        } else {
             contients = continentRepository.findByNameContainingIgnoreCase(keyword);
         }
         return contients.stream()

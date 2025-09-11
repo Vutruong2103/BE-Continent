@@ -12,9 +12,14 @@ import java.util.List;
 
 public interface ContinentService {
     ContinentDto create(ContinentDto dto);
+
     ContinentDto update(Long id, ContinentDto dto);
+
     void delete(Long id);
+
     ContinentDto getById(Long id);
+
     Page<ContinentDto> getAll(Pageable pageable);
+
     List<ContinentDto> searchByName(String keyword);
 }

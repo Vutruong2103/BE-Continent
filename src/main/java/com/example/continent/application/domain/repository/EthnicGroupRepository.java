@@ -16,11 +16,14 @@ import java.util.Optional;
  * Từ dân tộc (e) nối sang các quốc gia (countries) mà nó thuộc.
  * Từ quốc gia (c) nối tiếp sang châu lục (continent).
  * Lọc theo continentId được truyền vào. và Chỉ lấy những dân tộc chưa bị xoá mềm.
+ *
  * @Query: Lấy dân tộc theo id châu lục
  */
 public interface EthnicGroupRepository extends JpaRepository<EthnicGroup, Long> {
     Optional<EthnicGroup> findByCodeAndDeletedFalse(String code);
+
     Optional<EthnicGroup> findByIdAndDeletedFalse(Long id);
+
     Page<EthnicGroup> findAllByDeletedFalse(Pageable pageable);
 
     @EntityGraph(attributePaths = "countries")

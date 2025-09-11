@@ -23,7 +23,7 @@ import java.io.IOException;
  * Parse token → lấy username.
  * Validate token.
  * Lấy thông tin user từ DB.
- * Set thông tin user + roles vào SecurityContextHolder.
+ * Set thông tin user + roles vào SecurityContextHolder: lưu thông tin người dùng hiện tại (sau khi token đã được xác thực)
  * 4. Sau đó cho request đi tiếp.
  *
  * extends OncePerRequestFilter Đây là filter của Spring, đảm bảo mỗi request chỉ chạy filter 1 lần

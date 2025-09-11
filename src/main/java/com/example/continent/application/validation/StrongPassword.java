@@ -16,10 +16,12 @@ import java.lang.annotation.*;
  */
 @Documented
 @Constraint(validatedBy = StrongPasswordValidator.class)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StrongPassword {
     String message() default "Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa, 1 chữ số và 1 ký tự đặc biệt";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

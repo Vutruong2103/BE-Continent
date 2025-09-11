@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final MessageSource messageSource;
-    private final PasswordEncoder  passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -135,9 +135,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> searchByName(String keyword) {
         List<User> user;
-        if(keyword==null || keyword.isBlank()){
+        if (keyword == null || keyword.isBlank()) {
             user = userRepository.findAll();
-        }else {
+        } else {
             user = userRepository.findByUsernameContainingIgnoreCase(keyword);
         }
         return user.stream()
@@ -147,9 +147,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByUsername(String username) {
-        Optional<User> u= userRepository.findByUsernameAndDeletedFalse(username);
-        if(u.isPresent()){
-            return  u.get();
+        Optional<User> u = userRepository.findByUsernameAndDeletedFalse(username);
+        if (u.isPresent()) {
+            return u.get();
         }
         return null;
     }

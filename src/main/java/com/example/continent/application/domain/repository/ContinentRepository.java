@@ -10,16 +10,19 @@ import java.util.List;
 import java.util.Optional;
 
 /**
-* Repository là lớp trung gian giữa Service và Database
-* JpaRepository: kh cần viết sql, tự sinh CRUD, save(),findById(),findAll(),deleteById()
-* Continent: Entity mà repository sẽ thao tác
-* Long: kiểu dl của primary key (id)
-* Pageable chứa thông tin phân trang (số trang, số phần tử/trang, sort)
-*/
+ * Repository là lớp trung gian giữa Service và Database
+ * JpaRepository: kh cần viết sql, tự sinh CRUD, save(),findById(),findAll(),deleteById()
+ * Continent: Entity mà repository sẽ thao tác
+ * Long: kiểu dl của primary key (id)
+ * Pageable chứa thông tin phân trang (số trang, số phần tử/trang, sort)
+ */
 
 public interface ContinentRepository extends JpaRepository<Continent, Long> {
     Boolean existsByCode(String code);
+
     Optional<Continent> findByIdAndDeletedFalse(Long id);
+
     Page<Continent> findAllByDeletedFalse(Pageable pageable);
+
     List<Continent> findByNameContainingIgnoreCase(String keyword);
 }

@@ -12,7 +12,9 @@ import java.util.Optional;
 
 public interface LanguageRepository extends JpaRepository<Language, Long> {
     Optional<Language> findByCodeAndDeletedFalse(String code);
+
     Optional<Language> findByIdAndDeletedFalse(Long id);
+
     Page<Language> findAllByDeletedFalse(Pageable pageable);
 
     @EntityGraph(attributePaths = "countries")

@@ -11,10 +11,16 @@ import java.util.Optional;
 
 public interface UserService {
     UserDto create(UserDto dto);
+
     UserDto update(Long id, UserDto dto);
+
     void delete(Long id);
+
     UserDto getById(Long id);
+
     Page<UserDto> getAll(Pageable pageable);
+
     List<UserDto> searchByName(String keyword);
+
     User getByUsername(String username);
 }

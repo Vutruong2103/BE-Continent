@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * dùng để xử lý JWT trong ứng dụng Spring Boot.
+ * JwtService: dùng để xử lý JWT trong ứng dụng Spring Boot.
  * @PostConstruct init(): Khởi tạo key từ chuỗi secret sau khi bean được tạo.
  *
  * getSigningKey(): Tạo và trả về key dùng để ký và xác thực JWT.

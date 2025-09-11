@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 /**
+ * SimpleAuditorAware: Lớp này cung cấp thông tin về người dùng hiện tại để tự động điền các trường audit như createdBy, lastModifiedBy.
  * Nếu có login thì lấy username từ SecurityContextHolder
  * Ví dụ: return Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
  * Trường hợp chưa login: trả về giá trị mặc định

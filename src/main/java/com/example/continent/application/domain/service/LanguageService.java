@@ -9,10 +9,15 @@ import java.util.List;
 
 public interface LanguageService {
     LanguageDto create(LanguageDto dto);
+
     LanguageDto update(Long id, LanguageDto dto);
+
     void delete(Long id);
+
     LanguageDto getById(Long id);
+
     Page<LanguageDto> getAll(Pageable pageable);
+
     List<LanguageDto> getLanguagesByCountry(Long countryId);
 }
 

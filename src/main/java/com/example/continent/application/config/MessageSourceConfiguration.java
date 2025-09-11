@@ -23,6 +23,7 @@ import java.util.Locale;
  * lắng nghe tham số lang trên request, cho phép chuyển đổi ngôn ngữ động.
  * addInterceptors():
  * Đăng ký interceptor vừa tạo cho tất cả endpoint /api/**, giúp thay đổi ngôn ngữ qua tham số lang trên URL.
+ *
  */
 @Configuration
 public class MessageSourceConfiguration implements WebMvcConfigurer {

@@ -16,18 +16,21 @@ import org.springframework.web.bind.annotation.*;
 /**
  * AuthController xử lý việc đăng nhập và trả về JWT cho client.
  * Client sẽ sử dụng JWT này để xác thực các request tiếp theo.
+ * AuthenticationManager: Đối tượng này chịu trách nhiệm xác thực thông tin đăng nhập.
+ * JwtService: Lớp này dùng để tạo và xác thực JWT.
  */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController {
 
     AuthenticationManager authenticationManager;
     JwtService jwtService;
 
     @PostMapping("/login")
+
     @Operation(summary = "Đăng nhập nhận JWT")
     public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(

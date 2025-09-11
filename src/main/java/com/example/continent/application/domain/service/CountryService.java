@@ -9,11 +9,17 @@ import java.util.List;
 
 public interface CountryService {
     CountryDto create(CountryDto dto);
+
     CountryDto update(Long id, CountryDto dto);
+
     void delete(Long id);
+
     CountryDto getById(Long id);
+
     Page<CountryDto> getAll(Pageable pageable);
+
     Page<LanguageDto> getLanguagesByCountry(Long countryId, Pageable pageable);
+
     List<CountryDto> getCountriesByContinent(Long continentId);
 }
 

@@ -16,7 +16,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * daoAuthProvider: lấy user từ DB (CustomUserDetailsService) và so sánh password với BCrypt.
+ * DaoAuthenticationProvider: là 1 AuthenticationProvider có sẵn của Spring Security, nó dùng để xác thực người dùng dựa trên UserDetailsService và PasswordEncoder.
+ * jwtAuthFilter: lọc request, kiểm tra JWT hợp lệ rồi set thông tin user vào SecurityContextHolder.
  * authenticationManager: công cụ xác thực user khi login.
+ * AuthenticationProvider: là nơi chứa logic để xác thực người dùng (UserDetailsService, PasswordEncoder).
+ * SecurityFilterChain: cấu hình các rule bảo mật cho request.
+ *
  * @EnableMethodSecurity: để dùng @PreAuthorize trên controller
  */
 
@@ -30,7 +35,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
-    public static PasswordEncoder passwordEncoder(){
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -45,9 +50,9 @@ public class SecurityConfig {
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEW","MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("VIEW", "MANAGER")
 
-                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("MANAGER","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("MANAGER")
                         .anyRequest().authenticated()
