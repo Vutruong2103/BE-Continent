@@ -21,5 +21,5 @@ public interface ContinentService {
 
     Page<ContinentDto> getAll(Pageable pageable);
 
-    List<ContinentDto> searchByName(String keyword);
+    Page<ContinentDto> searchByName(String keyword);
 }

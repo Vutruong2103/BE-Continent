@@ -20,17 +20,20 @@ import java.util.Optional;
  * @Query: Lấy dân tộc theo id châu lục
  */
 public interface EthnicGroupRepository extends JpaRepository<EthnicGroup, Long> {
+
     Optional<EthnicGroup> findByCodeAndDeletedFalse(String code);
 
+    @EntityGraph(attributePaths = "countries")
     Optional<EthnicGroup> findByIdAndDeletedFalse(Long id);
 
+    @EntityGraph(attributePaths = "countries")
     Page<EthnicGroup> findAllByDeletedFalse(Pageable pageable);
 
     @EntityGraph(attributePaths = "countries")
     List<EthnicGroup> findByCountries_Id(Long countryId);
 
-    @Query("SELECT e FROM EthnicGroup e " +
-            "JOIN e.countries c " +
+    @Query("SELECT DISTINCT e FROM EthnicGroup e " +
+            "JOIN FETCH e.countries c " +
             "JOIN c.continent ct " +
             "WHERE ct.id = :continentId AND e.deleted = false")
     List<EthnicGroup> findByContinentId(@Param("continentId") Long continentId);

@@ -47,6 +47,7 @@ public class RoleServiceImpl implements RoleService {
                         messageSource.getMessage("error.role.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
+
         roleRepository.findByNameAndDeletedFalse(dto.getName())
                 .filter(r -> !r.getId().equals(id))
                 .ifPresent(r -> {
@@ -55,7 +56,9 @@ public class RoleServiceImpl implements RoleService {
                                     new Object[]{dto.getName()}, LocaleContextHolder.getLocale())
                     );
                 });
-        role.setName(dto.getName());
+
+        roleMapper.updateFromDto(dto, role);
+
         return roleMapper.toDto(roleRepository.save(role));
     }
 

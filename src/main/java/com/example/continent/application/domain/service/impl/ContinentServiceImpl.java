@@ -4,13 +4,14 @@ import com.example.continent.application.domain.model.Continent;
 import com.example.continent.application.domain.repository.ContinentRepository;
 import com.example.continent.application.domain.service.ContinentService;
 import com.example.continent.application.dto.ContinentDto;
-import com.example.continent.application.exception.ResourceAlreadyExistsException;
+import com.example.continent.application.exception.DuplicateResourceException;
 import com.example.continent.application.exception.ResourceNotFoundException;
 import com.example.continent.application.mapper.ContinentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,31 +34,34 @@ public class ContinentServiceImpl implements ContinentService {
     private final ContinentMapper continentMapper;
     private final MessageSource messageSource;
 
-
     @Override
     public ContinentDto create(ContinentDto dto) {
-        if (continentRepository.existsByCode(dto.getCode())) {
-            throw new ResourceAlreadyExistsException(
-                    messageSource.getMessage("error.continent.exists",
-                            new Object[]{dto.getCode()},
-                            LocaleContextHolder.getLocale())
-            );
-        }
+        continentRepository.findByCodeAndDeletedFalse(dto.getCode())
+                .ifPresent(existing -> {
+                    throw new DuplicateResourceException(
+                            messageSource.getMessage("error.continent.exists",
+                                    new Object[]{dto.getCode()},
+                                    LocaleContextHolder.getLocale())
+                    );
+                });
+
         Continent continent = continentMapper.toEntity(dto);
+        continent.setDeleted(false);
+
         return continentMapper.toDto(continentRepository.save(continent));
     }
 
     @Override
     @Transactional(readOnly = true)
     public ContinentDto getById(Long id) {
-        Continent continent = continentRepository.findByIdAndDeletedFalse(id)
+        return continentRepository.findByIdAndDeletedFalse(id)
+                .map(continentMapper::toDto)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 messageSource.getMessage("error.continent.notfound",
                                         new Object[]{id},
                                         LocaleContextHolder.getLocale())
                         ));
-        return continentMapper.toDto(continent);
     }
 
     @Override
@@ -75,8 +79,13 @@ public class ContinentServiceImpl implements ContinentService {
                                 new Object[]{id},
                                 LocaleContextHolder.getLocale())
                 ));
-        continent.setName(dto.getName());
+
         continent.setCode(dto.getCode());
+        continent.setName(dto.getName());
+
+        // cập nhật lại các quan hệ nếu có trong DTO
+        continentMapper.updateFromDto(dto, continent);
+
         return continentMapper.toDto(continentRepository.save(continent));
     }
 
@@ -94,15 +103,18 @@ public class ContinentServiceImpl implements ContinentService {
     }
 
     @Override
-    public List<ContinentDto> searchByName(String keyword) {
-        List<Continent> contients;
+    @Transactional(readOnly = true)
+    public Page<ContinentDto> searchByName(String keyword) {
+        Pageable pageable = PageRequest.of(0, 10); // hoặc truyền từ controller
+        Page<Continent> continents;
+
         if (keyword == null || keyword.isBlank()) {
-            contients = continentRepository.findAll();
+            continents = continentRepository.findAllByDeletedFalse(pageable);
         } else {
-            contients = continentRepository.findByNameContainingIgnoreCase(keyword);
+            continents = continentRepository.findByNameContainingIgnoreCaseAndDeletedFalse(keyword, pageable);
         }
-        return contients.stream()
-                .map(continentMapper::toDto)
-                .toList();
+
+        return continents.map(continentMapper::toDto);
     }
+
 }

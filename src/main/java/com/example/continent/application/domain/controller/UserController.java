@@ -56,7 +56,7 @@ public class UserController {
 
     @GetMapping("/search")
     @Transactional(readOnly = true)
-    public ResponseEntity<List<UserDto>> searchByName(@RequestParam(required = false) String keyword) {
+    public ResponseEntity<Page<UserDto>> searchByName(@RequestParam(required = false) String keyword) {
         return ResponseEntity.ok(userService.searchByName(keyword));
     }
 }

@@ -17,7 +17,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "roleName", source = "user", qualifiedByName = "mapRoleNames")
+    @Mapping(target = "roleNames", source = "user", qualifiedByName = "mapRoleNames")
     @Mapping(target = "roleIds", source = "user", qualifiedByName = "mapRoleIds")
     UserDto toDTO(User user);
 
@@ -50,6 +50,7 @@ public interface UserMapper {
     }
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "roles", source = "roleIds", qualifiedByName = "mapRoleIdsToRoles")
     void updateUserFromDto(UserDto userDto, @MappingTarget User user);
 
     @AfterMapping

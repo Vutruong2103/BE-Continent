@@ -31,10 +31,7 @@ public class Country extends AbstractAuditingEntity<Long>{
             inverseJoinColumns = @JoinColumn(name = "language_id"))
     private List<Language> languages;
 
-    @ManyToMany
-    @JoinTable(name = "country_ethnic_group",
-            joinColumns = @JoinColumn(name = "country_id"),
-            inverseJoinColumns = @JoinColumn(name = "ethnic_group_id"))
+    @ManyToMany(mappedBy = "countries")
     private List<EthnicGroup> ethnicGroups;
 
     @PrePersist @PreUpdate

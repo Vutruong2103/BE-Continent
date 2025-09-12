@@ -26,7 +26,7 @@ public class UserDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    private List<String> roleName;
+    private List<String> roleNames;
     private List<Long> roleIds;
 }
 

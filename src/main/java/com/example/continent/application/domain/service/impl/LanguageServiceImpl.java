@@ -34,6 +34,8 @@ public class LanguageServiceImpl implements LanguageService {
     @Transactional
     public LanguageDto create(LanguageDto dto) {
         log.debug(">>> LanguageDto input: {}", dto);
+
+        // kiểm tra trùng code
         languageRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .ifPresent(lang -> {
                     throw new DuplicateResourceException(
@@ -41,15 +43,18 @@ public class LanguageServiceImpl implements LanguageService {
                                     new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
                     );
                 });
+
         Language language = languageMapper.toEntity(dto);
         language.setDeleted(false);
-        if (dto.getCountryId() != null && !dto.getCountryId().isEmpty()) {
-            List<Country> countries = countryRepository.findAllById(dto.getCountryId());
+
+        // cập nhật countries nếu có
+        if (dto.getCountryIds() != null && !dto.getCountryIds().isEmpty()) {
+            List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
 
             if (countries.isEmpty()) {
                 throw new ResourceNotFoundException(
                         messageSource.getMessage("error.country.notfound.ids",
-                                new Object[]{dto.getCountryId()}, LocaleContextHolder.getLocale())
+                                new Object[]{dto.getCountryIds()}, LocaleContextHolder.getLocale())
                 );
             }
 
@@ -57,6 +62,7 @@ public class LanguageServiceImpl implements LanguageService {
             language.setCountries(countries);
             countries.forEach(c -> c.getLanguages().add(language));
         }
+
         return languageMapper.toDto(languageRepository.save(language));
     }
 
@@ -69,7 +75,6 @@ public class LanguageServiceImpl implements LanguageService {
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
 
-        // Kiểm tra duplicate code (trừ chính nó)
         languageRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .filter(l -> !l.getId().equals(id))
                 .ifPresent(l -> {
@@ -78,20 +83,21 @@ public class LanguageServiceImpl implements LanguageService {
                                     new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
                     );
                 });
-        language.setCode(dto.getCode());
-        language.setName(dto.getName());
+
+        languageMapper.updateFromDto(dto, language);
 
         // cập nhật lại quan hệ với country nếu có
-        if (dto.getCountryId() != null && !dto.getCountryId().isEmpty()) {
-            List<Country> countries = countryRepository.findAllById(dto.getCountryId());
+        if (dto.getCountryIds() != null && !dto.getCountryIds().isEmpty()) {
+            List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
             if (countries.isEmpty()) {
                 throw new ResourceNotFoundException(
                         messageSource.getMessage("error.country.notfound.ids",
-                                new Object[]{dto.getCountryId()}, LocaleContextHolder.getLocale())
+                                new Object[]{dto.getCountryIds()}, LocaleContextHolder.getLocale())
                 );
             }
             language.setCountries(countries);
         }
+
         return languageMapper.toDto(languageRepository.save(language));
     }
 
@@ -132,3 +138,4 @@ public class LanguageServiceImpl implements LanguageService {
                 .toList();
     }
 }
+

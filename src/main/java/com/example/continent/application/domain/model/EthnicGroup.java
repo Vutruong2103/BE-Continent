@@ -21,7 +21,12 @@ public class EthnicGroup extends AbstractAuditingEntity<Long>{
     @Column(nullable = false, length = 10, unique = true)
     private String code;
 
-    @ManyToMany(mappedBy = "ethnicGroups")
+    @ManyToMany
+    @JoinTable(
+            name = "country_ethnic_group",
+            joinColumns = @JoinColumn(name = "ethnic_group_id"),
+            inverseJoinColumns = @JoinColumn(name = "country_id")
+    )
     private List<Country> countries;
 
     @PrePersist @PreUpdate

@@ -18,9 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findAllByDeletedFalse(Pageable pageable);
 
-    List<User> findByUsernameContainingIgnoreCase(String keyword);
-
     @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.id = :id")
     Optional<User> findByIdWithRoles(@Param("id") Long id);
 
+    Page<User> findByUsernameContainingIgnoreCaseAndDeletedFalse(String username, Pageable pageable);
 }

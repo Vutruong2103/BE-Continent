@@ -5,6 +5,7 @@ import com.example.continent.application.dto.LanguageDto;
 import com.example.continent.application.domain.model.Language;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.util.List;
@@ -13,28 +14,28 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface LanguageMapper {
-    @Mapping(target = "countryId", source = "countries", qualifiedByName = "mappingRuleCountryId")
-    @Mapping(target = "countryName", source = "countries", qualifiedByName = "mappingRuleCountryName")
+
+    @Mapping(target = "countryIds", source = "language", qualifiedByName = "mapCountryIds")
+    @Mapping(target = "countryNames", source = "language", qualifiedByName = "mapCountryNames")
     LanguageDto toDto(Language language);
+
+    @Named("mapCountryIds")
+    default List<Long> getCountryIds(Language language) {
+        if (language == null || language.getCountries() == null) return List.of();
+        return language.getCountries().stream().map(Country::getId).toList();
+    }
+
+    @Named("mapCountryNames")
+    default Set<String> getCountryNames(Language language) {
+        if (language == null || language.getCountries() == null) return Set.of();
+        return language.getCountries().stream().map(Country::getName).collect(Collectors.toSet());
+    }
 
     @Mapping(target = "countries", ignore = true)
     Language toEntity(LanguageDto dto);
 
-    @Named("mappingRuleCountryId")
-    default List<Long> mappingRuleCountryId(List<Country> countries) {
-        if (countries == null || countries.isEmpty()) return List.of();
-        return countries.stream()
-                .map(Country::getId)   // lấy id
-                .collect(Collectors.toList());
-    }
-
-    @Named("mappingRuleCountryName")
-    default Set<String> mappingRuleCountryName(List<Country> countries) {
-        if (countries == null || countries.isEmpty()) return Set.of();
-        return countries.stream()
-                .map(Country::getName)   // lấy name
-                .collect(Collectors.toSet());
-    }
+    @Mapping(target = "id", ignore = true)
+    void updateFromDto(LanguageDto dto, @MappingTarget Language language);
 }
 
 

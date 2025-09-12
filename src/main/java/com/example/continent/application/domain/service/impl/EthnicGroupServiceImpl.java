@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +34,8 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
     @Transactional
     public EthnicGroupDto create(EthnicGroupDto dto) {
         log.debug(">>> EthnicGroupDto input: {}", dto);
+
+        // Check trùng code
         ethnicGroupRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .ifPresent(existing -> {
                     throw new DuplicateResourceException(
@@ -45,21 +46,24 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
 
         EthnicGroup group = ethnicGroupMapper.toEntity(dto);
         group.setDeleted(false);
-        if (dto.getCountryId() != null && !dto.getCountryId().isEmpty()) {
-            List<Country> countries = countryRepository.findAllById(dto.getCountryId());
 
+        // Gán danh sách quốc gia nếu có
+        if (dto.getCountryIds() != null && !dto.getCountryIds().isEmpty()) {
+            List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
             if (countries.isEmpty()) {
                 throw new ResourceNotFoundException(
                         messageSource.getMessage("error.country.notfound.ids",
-                                new Object[]{dto.getCountryId()}, LocaleContextHolder.getLocale())
+                                new Object[]{dto.getCountryIds()}, LocaleContextHolder.getLocale())
                 );
             }
-
-            log.debug(">>> Countries tìm thấy: {}", countries.size());
             group.setCountries(countries);
-            countries.forEach(c -> c.getEthnicGroups().add(group));
         }
-        return ethnicGroupMapper.toDto(ethnicGroupRepository.save(group));
+
+        EthnicGroup saved = ethnicGroupRepository.save(group);
+        // fetch lại với countries đã load (tránh lazy)
+        return ethnicGroupRepository.findByIdAndDeletedFalse(saved.getId())
+                .map(ethnicGroupMapper::toDto)
+                .orElseThrow();
     }
 
     @Override
@@ -71,6 +75,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
 
+        // Check trùng code
         ethnicGroupRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .filter(g -> !g.getId().equals(id))
                 .ifPresent(g -> {
@@ -80,10 +85,29 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
                     );
                 });
 
-        group.setCode(dto.getCode());
-        group.setName(dto.getName());
+        ethnicGroupMapper.updateFromDto(dto, group);
 
-        return ethnicGroupMapper.toDto(ethnicGroupRepository.save(group));
+        // Update danh sách quốc gia
+        if (dto.getCountryIds() != null) {
+            if (!dto.getCountryIds().isEmpty()) {
+                List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
+                if (countries.isEmpty()) {
+                    throw new ResourceNotFoundException(
+                            messageSource.getMessage("error.country.notfound.ids",
+                                    new Object[]{dto.getCountryIds()}, LocaleContextHolder.getLocale())
+                    );
+                }
+                group.setCountries(countries);
+            } else {
+                group.setCountries(List.of()); // clear nếu mảng rỗng
+            }
+        }
+
+        EthnicGroup saved = ethnicGroupRepository.save(group);
+        // fetch lại để mapper có countries
+        return ethnicGroupRepository.findByIdAndDeletedFalse(saved.getId())
+                .map(ethnicGroupMapper::toDto)
+                .orElseThrow();
     }
 
     @Override
@@ -94,7 +118,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
                         messageSource.getMessage("error.ethnic.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
-        group.setDeleted(true); // xóa mềm
+        group.setDeleted(true); // Xóa mềm
         ethnicGroupRepository.save(group);
     }
 
@@ -117,6 +141,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EthnicGroupDto> getEthnicGroupsByCountry(Long countryId) {
         return ethnicGroupRepository.findByCountries_Id(countryId).stream()
                 .map(ethnicGroupMapper::toDto)
@@ -126,9 +151,8 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
     @Override
     @Transactional(readOnly = true)
     public List<EthnicGroupDto> getByContinent(Long continentId) {
-        List<EthnicGroup> ethnicGroups = ethnicGroupRepository.findByContinentId(continentId);
-        return ethnicGroups.stream()
+        return ethnicGroupRepository.findByContinentId(continentId).stream()
                 .map(ethnicGroupMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

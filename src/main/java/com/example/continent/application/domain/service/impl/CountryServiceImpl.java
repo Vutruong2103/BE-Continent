@@ -56,7 +56,7 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public CountryDto create(CountryDto dto) {
-        // Check duplicate code
+        // Kiểm tra trùng code
         countryRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .ifPresent(existing -> {
                     throw new DuplicateResourceException(
@@ -86,7 +86,7 @@ public class CountryServiceImpl implements CountryService {
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
 
-        // Check duplicate code (exclude itself)
+        // Kiểm tra duplicate code (trừ chính nó)
         countryRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .filter(c -> !c.getId().equals(id))
                 .ifPresent(c -> {
@@ -102,8 +102,9 @@ public class CountryServiceImpl implements CountryService {
                                 new Object[]{dto.getContinentId()}, LocaleContextHolder.getLocale())
                 ));
 
-        country.setCode(dto.getCode());
-        country.setName(dto.getName());
+        countryMapper.updateFromDto(dto, country);
+
+        // set lại quan hệ với continent
         country.setContinent(continent);
 
         return countryMapper.toDto(countryRepository.save(country));
@@ -116,7 +117,7 @@ public class CountryServiceImpl implements CountryService {
                         messageSource.getMessage("error.country.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
-        country.setDeleted(true);
+        country.setDeleted(true); // xóa mềm
         countryRepository.save(country);
     }
 
@@ -140,11 +141,9 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public List<CountryDto> getCountriesByContinent(Long continentId) {
-        List<Country> countries = countryRepository.findByContinentId(continentId);
-        return countries.stream()
+        return countryRepository.findByContinentId(continentId).stream()
                 .map(countryMapper::toDto)
                 .toList();
     }
-
-
 }
+

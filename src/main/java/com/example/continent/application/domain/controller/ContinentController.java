@@ -66,7 +66,7 @@ public class ContinentController {
     @Operation(summary = "Tìm kiếm châu lục theo tên",
             description = "Tìm kiếm các châu lục có tên khớp với từ khóa (keyword). Trả về danh sách ContinentDto.")
     @GetMapping("/search")
-    public ResponseEntity<List<ContinentDto>> searchByName(@RequestParam(required = false) String keyword) {
+    public ResponseEntity<Page<ContinentDto>> searchByName(@RequestParam(required = false) String keyword) {
         return ResponseEntity.ok(continentService.searchByName(keyword));
     }
 }

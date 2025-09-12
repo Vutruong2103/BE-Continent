@@ -12,6 +12,6 @@ public class LanguageDto {
     private Long id;
     private String code;
     private String name;
-    private List<Long> countryId;
-    private Set<String> countryName;
+    private List<Long> countryIds;
+    private Set<String> countryNames;
 }

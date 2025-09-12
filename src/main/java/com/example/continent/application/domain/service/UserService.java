@@ -20,7 +20,7 @@ public interface UserService {
 
     Page<UserDto> getAll(Pageable pageable);
 
-    List<UserDto> searchByName(String keyword);
+    Page<UserDto> searchByName(String keyword);
 
     User getByUsername(String username);
 }

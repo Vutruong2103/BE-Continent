@@ -1,12 +1,10 @@
 package com.example.continent.application.domain.service.impl;
 
-import com.example.continent.application.domain.model.Continent;
 import com.example.continent.application.domain.model.Role;
 import com.example.continent.application.domain.model.User;
 import com.example.continent.application.domain.repository.RoleRepository;
 import com.example.continent.application.domain.repository.UserRepository;
 import com.example.continent.application.domain.service.UserService;
-import com.example.continent.application.dto.ContinentDto;
 import com.example.continent.application.dto.UserDto;
 import com.example.continent.application.exception.DuplicateResourceException;
 import com.example.continent.application.exception.ResourceNotFoundException;
@@ -15,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +35,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto create(UserDto dto) {
-        // Kiểm tra trùng username
+        // Check duplicate
         userRepository.findByUsernameAndDeletedFalse(dto.getUsername())
                 .ifPresent(u -> {
                     throw new DuplicateResourceException(
@@ -49,18 +46,13 @@ public class UserServiceImpl implements UserService {
 
         User user = userMapper.toEntity(dto);
 
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        // set roles nếu có
-        if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
-            List<Role> roles = roleRepository.findAllById(dto.getRoleIds());
-            if (roles.isEmpty()) {
-                throw new ResourceNotFoundException(
-                        messageSource.getMessage("error.role.notfound", null, LocaleContextHolder.getLocale())
-                );
-            }
-            user.setRoles(roles);
+        // encode password
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
+
+        // set roles
+        applyRoles(dto, user);
 
         user.setDeleted(false);
         return userMapper.toDTO(userRepository.save(user));
@@ -75,7 +67,6 @@ public class UserServiceImpl implements UserService {
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
 
-        // Kiểm tra trùng username (trừ chính nó)
         userRepository.findByUsernameAndDeletedFalse(dto.getUsername())
                 .filter(u -> !u.getId().equals(id))
                 .ifPresent(u -> {
@@ -85,21 +76,30 @@ public class UserServiceImpl implements UserService {
                     );
                 });
 
-        user.setUsername(dto.getUsername());
+        userMapper.updateUserFromDto(dto, user);
 
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        // cập nhật roles nếu có
-        if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
-            List<Role> roles = roleRepository.findAllById(dto.getRoleIds());
-            if (roles.isEmpty()) {
-                throw new ResourceNotFoundException(
-                        messageSource.getMessage("error.role.notfound", null, LocaleContextHolder.getLocale())
-                );
-            }
-            user.setRoles(roles);
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
+
         return userMapper.toDTO(userRepository.save(user));
+    }
+
+
+    private void applyRoles(UserDto dto, User user) {
+        if (dto.getRoleIds() != null) {
+            if (dto.getRoleIds().isEmpty()) {
+                user.setRoles(List.of());
+            } else {
+                List<Role> roles = roleRepository.findAllById(dto.getRoleIds());
+                if (roles.isEmpty()) {
+                    throw new ResourceNotFoundException(
+                            messageSource.getMessage("error.role.notfound", null, LocaleContextHolder.getLocale())
+                    );
+                }
+                user.setRoles(roles);
+            }
+        }
     }
 
     @Override
@@ -133,24 +133,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> searchByName(String keyword) {
-        List<User> user;
+    @Transactional(readOnly = true)
+    public Page<UserDto> searchByName(String keyword) {
+        Pageable pageable = PageRequest.of(0, 10); // hoặc truyền từ controller
+        Page<User> users;
+
         if (keyword == null || keyword.isBlank()) {
-            user = userRepository.findAll();
+            users = userRepository.findAllByDeletedFalse(pageable);
         } else {
-            user = userRepository.findByUsernameContainingIgnoreCase(keyword);
+            users = userRepository.findByUsernameContainingIgnoreCaseAndDeletedFalse(keyword, pageable);
         }
-        return user.stream()
-                .map(userMapper::toDTO)
-                .toList();
+
+        return users.map(userMapper::toDTO);
     }
 
+
     @Override
+    @Transactional(readOnly = true)
     public User getByUsername(String username) {
-        Optional<User> u = userRepository.findByUsernameAndDeletedFalse(username);
-        if (u.isPresent()) {
-            return u.get();
-        }
-        return null;
+        return userRepository.findByUsernameAndDeletedFalse(username)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messageSource.getMessage("error.user.notfound",
+                                new Object[]{username}, LocaleContextHolder.getLocale())
+                ));
     }
 }
