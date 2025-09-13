@@ -44,7 +44,6 @@ public class JwtService {
 
     @PostConstruct
     public void init() {
-        // Convert string secret thành key hợp lệ
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -60,12 +59,10 @@ public class JwtService {
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + expirationMs);
 
-        // Lấy authorities (roles hoặc scopes)
         List<String> scopes = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)   // ví dụ "ROLE_MANAGER"
                 .toList();
 
-        // Nhúng scopes vào claim
         Map<String, Object> claims = new HashMap<>();
         claims.put("scopes", scopes);
 

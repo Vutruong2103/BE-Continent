@@ -10,6 +10,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+/**
+ * author: Vutq
+ *
+ * @Mapping: ánh xạ các trường giữa Continent và ContinentDto.
+ * @Named: định nghĩa các phương thức tùy chỉnh để ánh xạ các trường phức tạp như danh sách ID và tên.
+ * @MappingTarget: cho phép cập nhật một thực thể hiện có từ một DTO.
+ *
+ * @getCountryIds: Lấy danh sách ID các quốc gia thuộc lục địa.
+ * @getCountryNames: Lấy tập hợp tên các quốc gia thuộc lục địa.
+ * @getEthnicGroupIds: Lấy danh sách ID các dân tộc thuộc các quốc gia trong lục địa.
+ * @getEthnicGroupNames: Lấy tập hợp tên các dân tộc thuộc các quốc gia trong lục địa.
+ * @toEntity: Chuyển đổi từ ContinentDto sang Continent, bỏ qua việc thiết lập danh sách quốc gia.
+ * @updateFromDto: Cập nhật một thực thể Continent hiện có từ ContinentDto, bỏ qua việc cập nhật ID.
+ */
 @Mapper(componentModel = "spring")
 public interface ContinentMapper {
 
@@ -49,7 +64,7 @@ public interface ContinentMapper {
                 .collect(Collectors.toSet());
     }
 
-    @Mapping(target = "countries", ignore = true) // chỉ set id
+    @Mapping(target = "countries", ignore = true)
     Continent toEntity(ContinentDto dto);
 
     @Mapping(target = "id", ignore = true)

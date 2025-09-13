@@ -25,7 +25,7 @@ import java.io.IOException;
  * Lấy thông tin user từ DB.
  * Set thông tin user + roles vào SecurityContextHolder: lưu thông tin người dùng hiện tại (sau khi token đã được xác thực)
  * 4. Sau đó cho request đi tiếp.
- *
+ * <p>
  * extends OncePerRequestFilter Đây là filter của Spring, đảm bảo mỗi request chỉ chạy filter 1 lần
  */
 
@@ -41,18 +41,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Lấy header "Authorization" từ request.
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
 
-        //Nếu header có dạng "Bearer <token>" → cắt ra lấy JWT.
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtUtil.extractUsername(token);
         }
 
-        //Kiểm tra & xác thực token
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtUtil.validateToken(token, userDetails.getUsername())) {
@@ -63,7 +60,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-        //filter chuyển request đi tiếp đến filter tiếp theo hoặc Controller.
         filterChain.doFilter(request, response);
     }
 }

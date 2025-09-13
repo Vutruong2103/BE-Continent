@@ -15,6 +15,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+/**
+ * @author :Vutq
+ *
+ * @updateFromDto: cập nhật các trường của Country từ CountryDto, ngoại trừ id, languages và ethnicGroups
+ * @toDto: chuyển đổi đối tượng Country sang CountryDto, ánh xạ các trường liên quan như continentId, continentName, languageIds, languageNames, ethnicGroupIds và ethnicGroupNames
+ * @toEntity: chuyển đổi đối tượng CountryDto sang Country, ánh xạ trường continent từ continentId và bỏ qua languages và ethnicGroups khi chuyển đổi
+ * @mapContinentIdToEntity: chuyển đổi continentId thành đối tượng Continent với chỉ id được thiết lập
+ * @mapLanguageIds: lấy danh sách các id ngôn ngữ từ đối tượng Country
+ * @mapLanguageNames: lấy tập hợp các tên ngôn ngữ từ đối tượng Country
+ * @mapEthnicGroupIds: lấy danh sách các id nhóm dân tộc từ đối tượng Country
+ * @mapEthnicGroupNames: lấy tập hợp các tên nhóm dân tộc từ đối tượng Country
+ *
+ * */
 @Mapper(componentModel = "spring")
 public interface CountryMapper {
 

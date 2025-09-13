@@ -16,6 +16,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.io.Serializable;
 import java.time.Instant;
 
+/**
+ * @author: Vutq
+ *
+ * @param <T>: Kiểu dữ liệu của ID (Long, String, v.v.)
+ * @serialVersionUID: Định danh phiên bản để đảm bảo tính tương thích khi tuần tự hóa.
+ * @MappedSuperclass: Chỉ định lớp này là lớp cha cho các thực thể JPA.
+ * @EntityListeners(AuditingEntityListener.class): Kích hoạt tính năng tự động ghi nhận thông tin tạo và sửa đổi.
+ * @SuperBuilder: Cung cấp khả năng xây dựng đối tượng với các lớp con.
+ * @NoArgsConstructor: Tạo constructor không tham số.
+ * @AllArgsConstructor: Tạo constructor với tất cả các tham số.
+ * @Instant: Lưu trữ thời gian theo chuẩn UTC.
+ */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @SuperBuilder

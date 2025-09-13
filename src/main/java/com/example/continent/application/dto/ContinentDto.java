@@ -5,9 +5,6 @@ import lombok.Data;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Dto là cái để trả cho clinent
- */
 @Data
 public class ContinentDto {
     private Long id;

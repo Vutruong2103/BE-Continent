@@ -22,7 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
+ * @author : Vutq
  *
+ * @getLanguagesByCountry: Lấy danh sách ngôn ngữ của một quốc gia theo ID quốc gia với phân trang.
+ * @create: Tạo mới một quốc gia, kiểm tra trùng mã (code), liên kết với lục địa, lưu vào cơ sở dữ liệu và trả về DTO đã lưu.
+ * @update: Cập nhật thông tin quốc gia theo ID, kiểm tra trùng mã (code), liên kết với lục địa, lưu vào cơ sở dữ liệu và trả về DTO đã cập nhật.
+ * @delete: Xóa mềm quốc gia theo ID (chỉ đánh dấu deleted = true).
+ * @getById: Lấy thông tin quốc gia theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * @getAll: Lấy danh sách tất cả quốc gia chưa bị xóa mềm với phân trang.
+ * @getCountriesByContinent: Lấy danh sách quốc gia theo ID lục địa.
  */
 @Service
 @RequiredArgsConstructor
@@ -56,7 +64,6 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public CountryDto create(CountryDto dto) {
-        // Kiểm tra trùng code
         countryRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .ifPresent(existing -> {
                     throw new DuplicateResourceException(
@@ -86,7 +93,6 @@ public class CountryServiceImpl implements CountryService {
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
 
-        // Kiểm tra duplicate code (trừ chính nó)
         countryRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .filter(c -> !c.getId().equals(id))
                 .ifPresent(c -> {
@@ -104,7 +110,6 @@ public class CountryServiceImpl implements CountryService {
 
         countryMapper.updateFromDto(dto, country);
 
-        // set lại quan hệ với continent
         country.setContinent(continent);
 
         return countryMapper.toDto(countryRepository.save(country));

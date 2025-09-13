@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author : Vutq
+ *
  * Lấy đối tượng EthnicGroup (dân tộc).
  * Từ dân tộc (e) nối sang các quốc gia (countries) mà nó thuộc.
  * Từ quốc gia (c) nối tiếp sang châu lục (continent).

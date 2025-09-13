@@ -35,7 +35,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto create(UserDto dto) {
-        // Check duplicate
         userRepository.findByUsernameAndDeletedFalse(dto.getUsername())
                 .ifPresent(u -> {
                     throw new DuplicateResourceException(
@@ -46,12 +45,10 @@ public class UserServiceImpl implements UserService {
 
         User user = userMapper.toEntity(dto);
 
-        // encode password
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
-        // set roles
         applyRoles(dto, user);
 
         user.setDeleted(false);
@@ -135,7 +132,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserDto> searchByName(String keyword) {
-        Pageable pageable = PageRequest.of(0, 10); // hoặc truyền từ controller
+        Pageable pageable = PageRequest.of(0, 10);
         Page<User> users;
 
         if (keyword == null || keyword.isBlank()) {

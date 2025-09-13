@@ -5,6 +5,15 @@ import lombok.*;
 
 import java.util.List;
 
+/**
+ * @author : Vutq
+ *
+ * @continent: Biểu thị một thực thể quốc gia với các thuộc tính như tên, mã, lục địa, ngôn ngữ và nhóm dân tộc.
+ * @languages: Danh sách các ngôn ngữ được sử dụng trong quốc gia này.
+ * @ethnicGroups: Danh sách các nhóm dân tộc sinh sống trong quốc gia này
+ * @joinColumns: Chỉ định cột khóa ngoại trong bảng liên kết trỏ đến thực thể hiện tại (Country).
+ * @inverseJoinColumns: Chỉ định cột khóa ngoại trong bảng liên kết trỏ đến thực thể liên kết (Language).
+ */
 @Entity
 @Table(name = "country",
         uniqueConstraints = { @UniqueConstraint(columnNames = "code") })

@@ -11,12 +11,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+/**
+ * @author : Vutq
+ *
+ * java(mapContinentId(entity.getCountries())): Biểu thức này gọi phương thức tùy chỉnh mapContinentId để trích xuất ID lục địa từ danh sách các quốc gia liên kết với nhóm dân tộc.
+ * java(mapContinentName(entity.getCountries())): Tương tự, biểu thức này gọi phương thức tùy chỉnh mapContinentName để trích xuất tên lục địa từ danh sách các quốc gia liên kết với nhóm dân tộc.
+ *
+ */
 @Mapper(componentModel = "spring")
 public interface EthnicGroupMapper {
 
     @Mapping(target = "countryIds", source = "countries")
     @Mapping(target = "countryNames", source = "countries")
-    // lấy continentId và continentName từ quốc gia đầu tiên (giả định 1 dân tộc thuộc 1 châu lục duy nhất)
     @Mapping(target = "continentIds", expression = "java(mapContinentId(entity.getCountries()))")
     @Mapping(target = "continentNames", expression = "java(mapContinentName(entity.getCountries()))")
     EthnicGroupDto toDto(EthnicGroup entity);
@@ -33,7 +40,7 @@ public interface EthnicGroupMapper {
 
     default Long mapContinentId(List<Country> countries) {
         if (countries == null || countries.isEmpty()) return null;
-        return countries.get(0).getContinent().getId(); // lấy từ quốc gia đầu tiên
+        return countries.get(0).getContinent().getId();
     }
 
     default String mapContinentName(List<Country> countries) {

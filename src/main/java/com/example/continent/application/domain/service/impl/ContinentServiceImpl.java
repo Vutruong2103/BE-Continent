@@ -16,13 +16,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 /**
+ * @author : Vutq
+ *
  * map DTO → Entity → save DB → convert lại trả về DTO -> client
  * nơi xử lý logic các method từ servie chuyển cho controller sử dụng
  * quản lý logic liên quan đến Continent như Crud, tìm kiếm, chuyển đổi giữa DTO và Entity, xử lý ngoại lệ và hỗ trợ i18n cho thông báo lỗi.
  *
+ * @create(ContinentDto dto): Tạo một lục địa mới, kiểm tra trùng mã (code), chuyển đổi DTO sang Entity, lưu vào cơ sở dữ liệu và trả về DTO đã lưu.
+ * @getById(Long id): Lấy thông tin lục địa theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * @getAll(Pageable pageable): Lấy danh sách tất cả lục địa chưa bị xóa mềm với phân trang.
+ * @update(Long id, ContinentDto dto): Cập nhật thông tin lục địa theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * @delete(Long id): Xóa mềm lục địa theo ID (chỉ đánh dấu deleted = true), nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * @searchByName(String keyword): Tìm kiếm lục địa theo tên chứa từ khóa (không phân biệt hoa thường) với phân trang.
  */
 
 @Service
@@ -83,7 +90,6 @@ public class ContinentServiceImpl implements ContinentService {
         continent.setCode(dto.getCode());
         continent.setName(dto.getName());
 
-        // cập nhật lại các quan hệ nếu có trong DTO
         continentMapper.updateFromDto(dto, continent);
 
         return continentMapper.toDto(continentRepository.save(continent));
@@ -105,7 +111,7 @@ public class ContinentServiceImpl implements ContinentService {
     @Override
     @Transactional(readOnly = true)
     public Page<ContinentDto> searchByName(String keyword) {
-        Pageable pageable = PageRequest.of(0, 10); // hoặc truyền từ controller
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Continent> continents;
 
         if (keyword == null || keyword.isBlank()) {

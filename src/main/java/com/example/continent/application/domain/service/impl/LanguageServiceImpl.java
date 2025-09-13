@@ -20,6 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+
+/**
+ * @author :Vutq
+ *
+ * @create(LanguageDto dto): Tạo một ngôn ngữ mới, kiểm tra trùng mã (code), chuyển đổi DTO sang Entity, lưu vào cơ sở dữ liệu và trả về DTO đã lưu.
+ * @update(Long id, LanguageDto dto): Cập nhật thông tin ngôn ngữ theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * @delete(Long id): Xóa mềm ngôn ngữ theo ID (chỉ đánh dấu deleted = true), nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * @getById(Long id): Lấy thông tin ngôn ngữ theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * @getAll(Pageable pageable): Lấy danh sách tất cả ngôn ngữ chưa bị xóa mềm với phân trang.
+ * @getLanguagesByCountry(Long countryId): Lấy danh sách ngôn ngữ theo ID quốc gia.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,7 +46,6 @@ public class LanguageServiceImpl implements LanguageService {
     public LanguageDto create(LanguageDto dto) {
         log.debug(">>> LanguageDto input: {}", dto);
 
-        // kiểm tra trùng code
         languageRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .ifPresent(lang -> {
                     throw new DuplicateResourceException(
@@ -47,7 +57,6 @@ public class LanguageServiceImpl implements LanguageService {
         Language language = languageMapper.toEntity(dto);
         language.setDeleted(false);
 
-        // cập nhật countries nếu có
         if (dto.getCountryIds() != null && !dto.getCountryIds().isEmpty()) {
             List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
 
@@ -86,7 +95,6 @@ public class LanguageServiceImpl implements LanguageService {
 
         languageMapper.updateFromDto(dto, language);
 
-        // cập nhật lại quan hệ với country nếu có
         if (dto.getCountryIds() != null && !dto.getCountryIds().isEmpty()) {
             List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
             if (countries.isEmpty()) {

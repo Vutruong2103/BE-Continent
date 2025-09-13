@@ -21,7 +21,7 @@ public class SimpleAuditorAware implements AuditorAware<String> {
         if (authentication == null || !authentication.isAuthenticated()) {
             return Optional.of("system"); // fallback
         }
-        return Optional.of(authentication.getName()); // username đăng nhập
+        return Optional.of(authentication.getName());
     }
 
 }

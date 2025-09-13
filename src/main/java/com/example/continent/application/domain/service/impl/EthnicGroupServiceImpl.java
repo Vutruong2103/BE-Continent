@@ -20,6 +20,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+
+/**
+ * @author : Vutq
+ *
+ * create(EthnicGroupDto dto): Tạo một nhóm dân tộc mới, kiểm tra trùng mã (code), chuyển đổi DTO sang Entity, lưu vào cơ sở dữ liệu và trả về DTO đã lưu.
+ * update(Long id, EthnicGroupDto dto): Cập nhật thông tin nhóm dân tộc theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * delete(Long id): Xóa mềm nhóm dân tộc theo ID (chỉ đánh dấu deleted = true), nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * getById(Long id): Lấy thông tin nhóm dân tộc theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
+ * getAll(Pageable pageable): Lấy danh sách tất cả nhóm dân tộc chưa bị xóa mềm với phân trang.
+ * getEthnicGroupsByCountry(Long countryId): Lấy danh sách nhóm dân tộc theo ID quốc gia.
+ * getByContinent(Long continentId): Lấy danh sách nhóm dân tộc theo ID lục địa.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,7 +47,6 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
     public EthnicGroupDto create(EthnicGroupDto dto) {
         log.debug(">>> EthnicGroupDto input: {}", dto);
 
-        // Check trùng code
         ethnicGroupRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .ifPresent(existing -> {
                     throw new DuplicateResourceException(
@@ -47,7 +58,6 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
         EthnicGroup group = ethnicGroupMapper.toEntity(dto);
         group.setDeleted(false);
 
-        // Gán danh sách quốc gia nếu có
         if (dto.getCountryIds() != null && !dto.getCountryIds().isEmpty()) {
             List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
             if (countries.isEmpty()) {
@@ -60,7 +70,6 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
         }
 
         EthnicGroup saved = ethnicGroupRepository.save(group);
-        // fetch lại với countries đã load (tránh lazy)
         return ethnicGroupRepository.findByIdAndDeletedFalse(saved.getId())
                 .map(ethnicGroupMapper::toDto)
                 .orElseThrow();
@@ -75,7 +84,6 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
 
-        // Check trùng code
         ethnicGroupRepository.findByCodeAndDeletedFalse(dto.getCode())
                 .filter(g -> !g.getId().equals(id))
                 .ifPresent(g -> {
@@ -87,7 +95,6 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
 
         ethnicGroupMapper.updateFromDto(dto, group);
 
-        // Update danh sách quốc gia
         if (dto.getCountryIds() != null) {
             if (!dto.getCountryIds().isEmpty()) {
                 List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
@@ -99,12 +106,11 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
                 }
                 group.setCountries(countries);
             } else {
-                group.setCountries(List.of()); // clear nếu mảng rỗng
+                group.setCountries(List.of());
             }
         }
 
         EthnicGroup saved = ethnicGroupRepository.save(group);
-        // fetch lại để mapper có countries
         return ethnicGroupRepository.findByIdAndDeletedFalse(saved.getId())
                 .map(ethnicGroupMapper::toDto)
                 .orElseThrow();
@@ -118,7 +124,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
                         messageSource.getMessage("error.ethnic.notfound",
                                 new Object[]{id}, LocaleContextHolder.getLocale())
                 ));
-        group.setDeleted(true); // Xóa mềm
+        group.setDeleted(true);
         ethnicGroupRepository.save(group);
     }
 

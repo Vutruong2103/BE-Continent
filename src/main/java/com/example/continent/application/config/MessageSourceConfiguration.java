@@ -34,14 +34,13 @@ public class MessageSourceConfiguration implements WebMvcConfigurer {
                 new ReloadableResourceBundleMessageSource();
         messageSource.setBasename("classpath:i18n/messages");
         messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setCacheSeconds(3600); // reload mỗi giờ
+        messageSource.setCacheSeconds(3600);
         return messageSource;
     }
 
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
-        // Ngôn ngữ mặc định
         slr.setDefaultLocale(new Locale(Constants.DEFAULT_LANGUAGE));
         return slr;
     }

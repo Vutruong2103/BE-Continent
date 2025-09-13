@@ -1,6 +1,5 @@
 package com.example.continent.application.domain.controller;
 
-import com.example.continent.application.domain.service.ContinentService;
 import com.example.continent.application.domain.service.RoleService;
 import com.example.continent.application.dto.RoleDto;
 import io.swagger.v3.oas.annotations.Operation;
