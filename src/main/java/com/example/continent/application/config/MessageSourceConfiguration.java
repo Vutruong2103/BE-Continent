@@ -1,6 +1,10 @@
 package com.example.continent.application.config;
 
 import com.example.continent.application.constants.Constants;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,4 +60,18 @@ public class MessageSourceConfiguration implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor()).addPathPatterns("/api/**");
     }
+
+
+        @Bean
+        public OpenAPI customOpenAPI() {
+            return new OpenAPI()
+                    .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                    .components(new Components().addSecuritySchemes("bearerAuth",
+                            new SecurityScheme()
+                                    .name("bearerAuth")
+                                    .type(SecurityScheme.Type.HTTP)
+                                    .scheme("bearer")
+                                    .bearerFormat("JWT")
+                    ));
+        }
 }

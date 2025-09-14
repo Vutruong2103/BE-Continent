@@ -1,13 +1,16 @@
 package com.example.continent.application.rest;
 
 import com.example.continent.application.domain.response.JWTAuthResponse;
+import com.example.continent.application.request.ApiResponse;
 import com.example.continent.application.request.LoginDto;
+import com.example.continent.application.request.LogoutRequest;
 import com.example.continent.application.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.expression.ParseException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -45,6 +48,12 @@ public class AuthController {
         log.info("token: {}", token);
 
         return ResponseEntity.ok(jwt);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody LogoutRequest logoutRequest) {
+        jwtService.logout(logoutRequest.getToken());
+        return ResponseEntity.ok().build();
     }
 
 }

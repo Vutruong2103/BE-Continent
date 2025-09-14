@@ -1,5 +1,8 @@
 package com.example.continent.application.security;
 
+import com.example.continent.application.domain.model.InvalidatedToken;
+import com.example.continent.application.domain.repository.InvalidatedTokenRepository;
+import com.example.continent.application.request.LogoutRequest;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -20,13 +23,16 @@ import java.util.function.Function;
  * JwtService: dùng để xử lý JWT trong ứng dụng Spring Boot.
  * @PostConstruct init(): Khởi tạo key từ chuỗi secret sau khi bean được tạo.
  *
+ * @invalidatedTokenRepository: nơi lưu token bị logout
+ *
  * getSigningKey(): Tạo và trả về key dùng để ký và xác thực JWT.
  * generateToken(Authentication authentication):
  * Sinh JWT cho user đã xác thực, Lấy username, authorities (quyền) từ user, Đưa quyền vào claim scopes, Thiết lập subject, issuedAt, expiration, ký bằng key bí mật.
  *
+ *
  * extractUsername(String token): Lấy username (subject) từ JWT.
  * extractClaim(String token, Function<Claims, T> fn): Hàm tổng quát để lấy bất kỳ claim nào từ JWT.
- * validateToken(String token, String username): Xác thực JWT bằng cách so sánh username trong token với username được truyền vào
+ * validateToken(String token, String username): Validate token (chưa hết hạn, username đúng, không bị logout)
  */
 
 @Service
@@ -39,8 +45,13 @@ public class JwtService {
     @Value("${security.jwt.expiration-ms:86400000}") // 24h
     private long expirationMs;
 
-
     private SecretKey key;
+
+    private final InvalidatedTokenRepository invalidatedTokenRepository;
+
+    public JwtService(InvalidatedTokenRepository invalidatedTokenRepository) {
+        this.invalidatedTokenRepository = invalidatedTokenRepository;
+    }
 
     @PostConstruct
     public void init() {
@@ -49,7 +60,7 @@ public class JwtService {
 
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateToken(Authentication authentication) {
@@ -68,12 +79,24 @@ public class JwtService {
 
         return Jwts.builder()
                 .setClaims(claims)
+                .setId(UUID.randomUUID().toString())
                 .setSubject(username)
                 .setIssuedAt(currentDate)
                 .setExpiration(expireDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
+     public void logout(String token){
+        Claims claims = extractAllClaims(token);
+
+         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                 .id(claims.getId())
+                 .expiryTime(claims.getExpiration())
+                 .build();
+
+         invalidatedTokenRepository.save(invalidatedToken);
+     }
 
 
     public String extractUsername(String token) {
@@ -89,10 +112,21 @@ public class JwtService {
         return fn.apply(claims);
     }
 
-    public boolean validateToken(String token, String username) {
-        String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username));
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
+    public boolean validateToken(String token, String username) {
+        Claims claims = extractAllClaims(token);
+
+        boolean notExpired = claims.getExpiration().after(new Date());
+        boolean notInvalidated = !invalidatedTokenRepository.existsById(claims.getId());
+
+        return (claims.getSubject().equals(username) && notExpired && notInvalidated);
+    }
 }
 

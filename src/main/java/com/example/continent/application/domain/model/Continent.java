@@ -14,6 +14,7 @@ import java.util.List;
  * @countries: Danh sách các quốc gia thuộc châu lục này.
  * @PrePersist @PreUpdate: Các phương thức này được gọi tự động trước khi thực hiện lưu mới hoặc cập nhật bản ghi.
  * @upcase: Chuyển đổi mã thành chữ hoa trước khi lưu hoặc cập nhật.
+ * @mappedBy: tham chiếu ngược về thuộc tính "continent" trong lớp Country.
  */
 @Entity
 @Table(name = "continent",
