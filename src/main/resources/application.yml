@@ -1,0 +1,90 @@
+# ========================
+# Cau hinh ung dung chinh
+# ========================
+spring:
+  application:
+    name: continent
+
+  main:
+    allow-bean-definition-overriding: true
+
+  # ========================
+  # Cau hinh LIQUIBASE
+  # ========================
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/changelog-master.yml
+    clear-checksums: true
+
+  # ========================
+  # Cau hinh KET NOI DATABASE (MariaDB)
+  # ========================
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/continent?serverTimezone=UTC&createDatabaseIfNotExist=true&characterEncoding=UTF-8
+    username: root
+    password: mariadb@123
+
+  # ========================
+  # Cau hinh JPA / Hibernate
+  # ========================
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: deferred
+
+  jpa:
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        proc.param_null_passing: true
+        jdbc.time_zone: UTC
+        id.new_generator_mappings: true
+        connection.provider_disables_autocommit: true
+
+  # ========================
+  # Cau hinh NGON NGU / I18N
+  # ========================
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+  # ========================
+  # Cau hinh BAO MAT (Keycloak + OAuth2)
+  # ========================
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/your-new-realm
+
+# ========================
+# Cau hinh CONG MANG (PORT)
+# ========================
+server:
+  port: 8080
+
+# ========================
+# Cau hinh CORS (Cho phep frontend khac domain truy cap API)
+# ========================
+cors:
+  allowed-origins: "http://localhost:3000,http://localhost:4200"
+  allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowed-headers: "*"
+  allow-credentials: true
+  max-age: 3600
+
+# ========================
+# Cau hinh MAIL SERVER (Gui email)
+# ========================
+mailServer:
+  host: smtp.gmail.com
+  port: 587
+  email: vuff12345@gmail.com
+  password: Quangvuff12345
+  protocol: smtp
+  isSSL: false

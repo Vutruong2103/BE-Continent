@@ -82,22 +82,23 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDTO(userRepository.save(user));
     }
 
-
     private void applyRoles(UserDto dto, User user) {
-        if (dto.getRoleIds() != null) {
-            if (dto.getRoleIds().isEmpty()) {
-                user.setRoles(List.of());
-            } else {
-                List<Role> roles = roleRepository.findAllById(dto.getRoleIds());
-                if (roles.isEmpty()) {
-                    throw new ResourceNotFoundException(
-                            messageSource.getMessage("error.role.notfound", null, LocaleContextHolder.getLocale())
-                    );
-                }
-                user.setRoles(roles);
-            }
+        if (dto.getRoleIds() == null) return;
+
+        if (dto.getRoleIds().isEmpty()) {
+            user.setRoles(List.of());
+            return;
         }
+
+        List<Role> roles = roleRepository.findAllById(dto.getRoleIds());
+        if (roles.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    messageSource.getMessage("error.role.notfound", null, LocaleContextHolder.getLocale())
+            );
+        }
+        user.setRoles(roles);
     }
+
 
     @Override
     @Transactional

@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * @author : Vutq
- *
+ * <p>
  * create(EthnicGroupDto dto): Tạo một nhóm dân tộc mới, kiểm tra trùng mã (code), chuyển đổi DTO sang Entity, lưu vào cơ sở dữ liệu và trả về DTO đã lưu.
  * update(Long id, EthnicGroupDto dto): Cập nhật thông tin nhóm dân tộc theo ID, nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
  * delete(Long id): Xóa mềm nhóm dân tộc theo ID (chỉ đánh dấu deleted = true), nếu không tìm thấy sẽ ném ngoại lệ ResourceNotFoundException.
@@ -42,9 +42,9 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
     private final MessageSource messageSource;
     private final CountryRepository countryRepository;
 
-    @Override
-    @Transactional
-    public EthnicGroupDto create(EthnicGroupDto dto) {
+/*    @Override
+    @Transactional*/
+/*    public EthnicGroupDto create(EthnicGroupDto dto) {
         log.debug(">>> EthnicGroupDto input: {}", dto);
 
         ethnicGroupRepository.findByCodeAndDeletedFalse(dto.getCode())
@@ -56,7 +56,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
                 });
 
         EthnicGroup group = ethnicGroupMapper.toEntity(dto);
-        group.setDeleted(false);
+        group.setDeleted(false); //Cái này có thể để mặc định ở Entity lúc tạo hoặc là để ở dto luôn không cần thiết viết ở service
 
         if (dto.getCountryIds() != null && !dto.getCountryIds().isEmpty()) {
             List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
@@ -70,9 +70,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
         }
 
         EthnicGroup saved = ethnicGroupRepository.save(group);
-        return ethnicGroupRepository.findByIdAndDeletedFalse(saved.getId())
-                .map(ethnicGroupMapper::toDto)
-                .orElseThrow();
+        return ethnicGroupMapper.toDto(saved);
     }
 
     @Override
@@ -96,7 +94,7 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
         ethnicGroupMapper.updateFromDto(dto, group);
 
         if (dto.getCountryIds() != null) {
-            if (!dto.getCountryIds().isEmpty()) {
+            if (dto.getCountryIds().isEmpty()) {
                 List<Country> countries = countryRepository.findAllById(dto.getCountryIds());
                 if (countries.isEmpty()) {
                     throw new ResourceNotFoundException(
@@ -111,10 +109,83 @@ public class EthnicGroupServiceImpl implements EthnicGroupService {
         }
 
         EthnicGroup saved = ethnicGroupRepository.save(group);
-        return ethnicGroupRepository.findByIdAndDeletedFalse(saved.getId())
-                .map(ethnicGroupMapper::toDto)
-                .orElseThrow();
+        return ethnicGroupMapper.toDto(saved);
+    }*/
+
+    @Override
+    @Transactional
+    public EthnicGroupDto create(EthnicGroupDto dto) {
+        log.debug(">>> EthnicGroupDto input: {}", dto);
+
+        ethnicGroupRepository.findByCodeAndDeletedFalse(dto.getCode())
+                .ifPresent(existing -> {
+                    throw new DuplicateResourceException(
+                            messageSource.getMessage("error.ethnic.exists",
+                                    new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
+                    );
+                });
+
+        EthnicGroup group = ethnicGroupMapper.toEntity(dto);
+        group.setDeleted(false);
+
+        updateGroupCountries(group, dto);
+
+        EthnicGroup saved = ethnicGroupRepository.save(group);
+        return ethnicGroupMapper.toDto(saved);
     }
+
+    @Override
+    @Transactional
+    public EthnicGroupDto update(Long id, EthnicGroupDto dto) {
+        EthnicGroup group = ethnicGroupRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messageSource.getMessage("error.ethnic.notfound",
+                                new Object[]{id}, LocaleContextHolder.getLocale())
+                ));
+
+        ethnicGroupRepository.findByCodeAndDeletedFalse(dto.getCode())
+                .filter(g -> !g.getId().equals(id))
+                .ifPresent(g -> {
+                    throw new DuplicateResourceException(
+                            messageSource.getMessage("error.ethnic.exists",
+                                    new Object[]{dto.getCode()}, LocaleContextHolder.getLocale())
+                    );
+                });
+
+        ethnicGroupMapper.updateFromDto(dto, group);
+
+        updateGroupCountries(group, dto);
+
+        EthnicGroup saved = ethnicGroupRepository.save(group);
+        return ethnicGroupMapper.toDto(saved);
+    }
+
+    private void updateGroupCountries(EthnicGroup group, EthnicGroupDto dto) {
+        List<Long> countryIds = dto.getCountryIds();
+
+        if (countryIds == null) {
+            return;
+        }
+
+        if (countryIds.isEmpty()) {
+            group.setCountries(List.of());
+            return;
+        }
+
+        List<Country> countries = countryRepository.findAllById(countryIds);
+        if (countries.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    messageSource.getMessage(
+                            "error.country.notfound.ids",
+                            new Object[]{countryIds},
+                            LocaleContextHolder.getLocale()
+                    )
+            );
+        }
+
+        group.setCountries(countries);
+    }
+
 
     @Override
     @Transactional
